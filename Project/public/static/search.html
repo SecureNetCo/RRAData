@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataPage - 검색</title>
+    <!-- Cache bust: v1.1 -->
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <h1><a href="/" style="color: white; text-decoration: none;">DataPage</a></h1>
+        <nav class="main-nav">
+            <ul>
+                <li class="has-submenu">
+                    <a href="#">데이터a</a>
+                    <ul>
+                        <li><a href="/search/dataA/safetykoreachild">어린이용품 인증정보</a></li>
+                        <li><a href="/search/dataA/safetykoreahome">생활용품</a></li>
+                        <li><a href="/search/dataA/safetykorea">SafetyKorea</a></li>
+                        <li><a href="/search/dataA/approval-details">승인정보</a></li>
+                        <li><a href="/search/dataA/declaration-details">신고정보</a></li>
+                        <li><a href="/search/dataA/kwtc">KWTC 인증등록정보망</a></li>
+                        <li><a href="/search/dataA/rra-self-conformity">RRA 자기적합 인증</a></li>
+                        <li><a href="/search/dataA/rra-certification">RRA 적합등록 인증</a></li>
+                        <li><a href="/search/dataA/recall">리콜정보(국내)</a></li>
+                        <li><a href="/search/dataA/efficiency-rating">효율등급</a></li>
+                        <li><a href="/search/dataA/high-efficiency">고효율기기</a></li>
+                        <li><a href="/search/dataA/standby-power">대기전력</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="#">데이터b</a>
+                    <ul>
+                        <li><a href="/search/dataB/wadiz-makers">Wadiz 메이커</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="#">데이터c</a>
+                    <ul>
+                        <li class="has-submenu">
+                            <a href="#">성공</a>
+                            <ul>
+                                <li><a href="/search/dataC/success/safetykoreachild">어린이용품 인증정보</a></li>
+                                <li><a href="/search/dataC/success/safetykoreahome">생활용품</a></li>
+                                <li><a href="/search/dataC/success/safetykorea">SafetyKorea</a></li>
+                                <li><a href="/search/dataC/success/approval-details">승인정보</a></li>
+                                <li><a href="/search/dataC/success/declaration-details">신고정보</a></li>
+                                <li><a href="/search/dataC/success/wadiz-makers">Wadiz 메이커</a></li>
+                                <li><a href="/search/dataC/success/kwtc">KWTC 인증등록정보망</a></li>
+                                <li><a href="/search/dataC/success/rra-self-conformity">RRA 자기적합 인증</a></li>
+                                <li><a href="/search/dataC/success/rra-certification">RRA 적합등록 인증</a></li>
+                                <li><a href="/search/dataC/success/recall">리콜정보(국내)</a></li>
+                                <li><a href="/search/dataC/success/efficiency-rating">효율등급</a></li>
+                                <li><a href="/search/dataC/success/high-efficiency">고효율기기</a></li>
+                                <li><a href="/search/dataC/success/standby-power">대기전력</a></li>
+                            </ul>
+                        </li>
+                        <li class="has-submenu">
+                            <a href="#">실패</a>
+                            <ul>
+                                <li><a href="/search/dataC/failed/safetykoreachild">어린이용품 인증정보</a></li>
+                                <li><a href="/search/dataC/failed/safetykoreahome">생활용품</a></li>
+                                <li><a href="/search/dataC/failed/safetykorea">SafetyKorea</a></li>
+                                <li><a href="/search/dataC/failed/approval-details">승인정보</a></li>
+                                <li><a href="/search/dataC/failed/declaration-details">신고정보</a></li>
+                                <li><a href="/search/dataC/failed/wadiz-makers">Wadiz 메이커</a></li>
+                                <li><a href="/search/dataC/failed/kwtc">KWTC 인증등록정보망</a></li>
+                                <li><a href="/search/dataC/failed/rra-self-conformity">RRA 자기적합 인증</a></li>
+                                <li><a href="/search/dataC/failed/rra-certification">RRA 적합등록 인증</a></li>
+                                <li><a href="/search/dataC/failed/recall">리콜정보(국내)</a></li>
+                                <li><a href="/search/dataC/failed/efficiency-rating">효율등급</a></li>
+                                <li><a href="/search/dataC/failed/high-efficiency">고효율기기</a></li>
+                                <li><a href="/search/dataC/failed/standby-power">대기전력</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="search-page">
+        <!-- 검색 헤더 -->
+        <div class="search-header">
+            <h2 id="search-title">데이터 검색</h2>
+            <p id="search-description">원하시는 키워드를 입력하여 데이터를 검색하세요.</p>
+        </div>
+
+        <!-- 검색 섹션 -->
+        <div class="search-section">
+            <div class="search-box">
+                <select id="search-field" class="search-field">
+                    <!-- 검색 필드는 JavaScript에서 동적으로 로드됩니다 -->
+                </select>
+                <input type="text" id="search-input" class="search-input" placeholder="검색어를 입력하세요...">
+                <button id="search-btn" class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 결과 정보 -->
+        <div id="results-info" class="results-info" style="display: none;">
+            <div class="results-count">
+                <span id="total-count">0</span>건의 결과
+            </div>
+            <button id="download-all-btn" class="download-btn">
+                <i class="fas fa-download"></i> 전체 다운로드
+            </button>
+        </div>
+
+        <!-- 검색 결과 -->
+        <div id="results-container" class="results-container">
+            <!-- 초기 안내 메시지 -->
+            <div id="initial-message" class="container" style="padding: 60px 20px; text-align: center; color: #666;">
+                <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
+                <h3>검색어를 입력해주세요</h3>
+                <p>위의 검색창에 키워드를 입력하여 데이터를 찾아보세요.</p>
+            </div>
+            
+            <!-- 검색 결과 리스트 -->
+            <div id="search-results" style="display: none;"></div>
+            
+            <!-- 검색 결과 없음 -->
+            <div id="no-results" style="display: none; padding: 60px 20px; text-align: center; color: #666;">
+                <i class="fas fa-search-minus" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
+                <h3>검색 결과가 없습니다</h3>
+                <p>다른 키워드로 검색해보세요.</p>
+            </div>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <div id="pagination-container" class="pagination-container" style="display: none;">
+            <!-- 페이지네이션 버튼들이 여기에 동적으로 생성됩니다 -->
+        </div>
+    </div>
+
+    <footer>
+        <p>© DataPage</p>
+    </footer>
+
+    <!-- 다운로드 모달 -->
+    <div id="download-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-download"></i> 파일 다운로드</h3>
+                <button class="modal-close" id="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="download-options">
+                    <h4>Excel 파일로 다운로드</h4>
+                    <div class="format-info">
+                        <div class="format-description">
+                            <i class="fas fa-file-excel" style="color: #27ae60; font-size: 2rem; margin-bottom: 10px;"></i>
+                            <p>검색된 결과를 Excel 파일(.xlsx)로 다운로드합니다.</p>
+                            <p>모든 필드가 포함되며, 필터링 및 정렬이 가능합니다.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="download-info">
+                    <div class="info-item">
+                        <span class="info-label">데이터 건수:</span>
+                        <span id="download-count" class="info-value">0건</span>
+                    </div>
+                </div>
+                
+                <div class="download-progress" id="download-progress" style="display: none;">
+                    <div class="progress-info">
+                        <span id="progress-message">파일 생성 중...</span>
+                        <span id="progress-percentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button id="cancel-download" class="btn btn-secondary">취소</button>
+                <button id="start-download" class="btn btn-primary">
+                    <i class="fas fa-download"></i> 다운로드 시작
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로딩 오버레이 -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>데이터를 검색하고 있습니다...</p>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/js/dynamic-search.js"></script>
+    <script src="/static/js/cold-start-monitor.js"></script>
+    <script src="/static/js/smart-prefetch.js"></script>
+</body>
+</html>

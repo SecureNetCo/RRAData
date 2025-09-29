@@ -1,0 +1,31 @@
+{
+  "case_insensitive_fields": {
+    "company_name": true,
+    "product_name": true,
+    "maker_name": true,
+    "entrprsNm": true,
+    "상호/법인명": true,
+    "사업자명": true,
+    "업체명": true,
+    "제품명": true,
+    "품목명": true,
+    "기자재명칭": true,
+    "상호": true,
+    "importer_name": true
+  },
+  "case_sensitive_fields": {
+    "model_name": false,
+    "certification_no": false,
+    "cert_num": false,
+    "모델명": false,
+    "인증번호": false,
+    "승인번호": false,
+    "신고번호": false,
+    "리콜번호": false,
+    "crtfcNo": false,
+    "apprvNo": false,
+    "dclrNo": false,
+    "rcllNo": false
+  },
+  "default_case_insensitive": false
+}

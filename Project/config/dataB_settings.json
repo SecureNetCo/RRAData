@@ -1,0 +1,157 @@
+{
+  "wadiz-makers": {
+    "category_info": {
+      "display_name": "와디즈 메이커스",
+      "description": "와디즈 플랫폼 메이커 기업 정보",
+      "icon": "users",
+      "data_file": "parquet/2_wadiz_flattened.parquet",
+      "is_large_file": false,
+      "data_path": "root"
+    },
+    "display_fields": [
+      {
+        "field": "상호/법인명",
+        "name": "상호/법인명",
+        "width": "18%",
+        "type": "text",
+        "align": "left",
+        "sortable": true,
+        "searchable": true
+      },
+      {
+        "field": "주요 제품",
+        "name": "주요제품",
+        "width": "15%",
+        "type": "text",
+        "align": "left",
+        "sortable": true,
+        "searchable": true
+      },
+      {
+        "field": "사업자등록번호",
+        "name": "사업자등록번호",
+        "width": "12%",
+        "type": "text",
+        "align": "center",
+        "sortable": true,
+        "searchable": true
+      },
+      {
+        "field": "category",
+        "name": "카테고리",
+        "width": "10%",
+        "type": "text",
+        "align": "center",
+        "sortable": true,
+        "searchable": false
+      },
+      {
+        "field": "업종",
+        "name": "업종",
+        "width": "12%",
+        "type": "text",
+        "align": "left",
+        "sortable": true,
+        "searchable": false
+      },
+      {
+        "field": "홈페이지",
+        "name": "홈페이지",
+        "width": "10%",
+        "type": "link",
+        "align": "center",
+        "sortable": false,
+        "searchable": false
+      },
+      {
+        "field": "대표자 정보",
+        "name": "대표자 정보",
+        "width": "10%",
+        "type": "text",
+        "align": "center",
+        "sortable": true,
+        "searchable": false
+      },
+      {
+        "field": "주소",
+        "name": "주소",
+        "width": "20%",
+        "type": "text",
+        "align": "left",
+        "sortable": false,
+        "searchable": false
+      },
+      {
+        "field": "전화번호",
+        "name": "전화번호",
+        "width": "10%",
+        "type": "text",
+        "align": "center",
+        "sortable": false,
+        "searchable": false
+      }
+    ],
+    "download_fields": [
+      "상호/법인명",
+      "주요 제품",
+      "업종",
+      "기업규모",
+      "기업유형",
+      "종업원수",
+      "대표자 정보",
+      "설립일",
+      "주소",
+      "홈페이지",
+      "전화번호",
+      "벤처기업인증",
+      "지적재산권",
+      "사업자등록번호",
+      "category"
+    ],
+    "search_fields": [
+      {
+        "field": "상호/법인명",
+        "name": "상호/법인명",
+        "placeholder": "상호/법인명으로 검색"
+      },
+      {
+        "field": "주요 제품",
+        "name": "주요제품",
+        "placeholder": "주요제품으로 검색"
+      },
+      {
+        "field": "사업자등록번호",
+        "name": "사업자등록번호",
+        "placeholder": "사업자등록번호로 검색"
+      }
+    ],
+    "field_types": {
+      "category": "text",
+      "상호/법인명": "text",
+      "주요 제품": "text",
+      "업종": "text",
+      "기업규모": "text",
+      "기업유형": "text",
+      "종업원수": "text",
+      "대표자 정보": "text",
+      "설립일": "text",
+      "주소": "text",
+      "홈페이지": "text",
+      "전화번호": "text",
+      "벤처기업인증": "text",
+      "지적재산권": "text",
+      "사업자등록번호": "text"
+    },
+    "ui_settings": {
+      "default_sort": {
+        "field": "상호/법인명",
+        "direction": "asc"
+      },
+      "items_per_page": 20,
+      "enable_search": true,
+      "enable_download": true,
+      "enable_pagination": true,
+      "show_total_count": true
+    }
+  }
+}

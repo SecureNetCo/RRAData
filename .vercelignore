@@ -1,0 +1,51 @@
+# 개발 환경 파일들
+.env
+.env.local
+.env.development
+.env.test
+
+# OS 생성 파일들
+.DS_Store
+Thumbs.db
+
+# 버전 관리
+.git/
+.gitignore
+
+# IDE 파일들
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python 캐시
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 로그 파일
+*.log
+
+# 임시 파일들
+automation/
+scripts/
+*.txt
+!requirements.txt
+!vercel-force-update.txt

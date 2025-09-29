@@ -1,0 +1,83 @@
+좋아요. dataA/dataC “새로운 페이지” 추가 시 빠뜨리기 쉬운 항목들을 카테고리별로 체크리스트로 정리했습니다. 구조상 별도의 HTML 파일을 늘릴 필요 없이, 네비게이션 링
+크만 추가하면 search.html 한 장으로 동작합니다.
+
+전체 흐름
+
+- 링크 추가 → JS가 URL에서 카테고리 추출 → 설정 로드(/api/settings/...) → 검색 호출(/api/search/...) → 다운로드 호출(/api/download-search/...)
+- 백엔드는 Blob URL 매핑/환경변수 + 표시/검색 필드 설정(field_settings.json)만 맞으면 공통 엔드포인트로 동작
+
+DataA 추가 체크리스트
+
+- 네비게이션:
+    - Project/public/static/search.html에 링크 추가: /search/dataA/<새-서브카테고리>
+    - 별도 HTML 불필요 (라우팅이 모두 search.html로 들어옴)
+- 프런트 설정(필드/검색/다운로드):
+    - Project/config/field_settings.json에 dataA.<새-서브카테고리> 블록 추가
+    - 필수 키: category_info(display_name/description/data_file), display_fields(field/name/type/width), search_fields(field/name/placeholder), download_fields
+    - 검색 필드 field는 실제 컬럼명(예: "업체명", "모델명", "제품명") 또는 추상 키("company_name","model_name","product_name") 중 택1
+- 백엔드 데이터 경로:
+    - Project/api/main.py → get_data_file_path(...) 매핑 딕셔너리에 ( "dataA", "<새-서브카테고리>" ): os.getenv("BLOB_URL_DATAA_...") 추가
+    - Vercel 환경변수에 해당 BLOB_URL_DATAA_* 추가
+- DuckDB/검색:
+    - Parquet/Blob이면 자동 DuckDB 경로 사용. 컬럼명이 한글인 경우도 DuckDB에서 검색 가능
+    - 서버사이드 페이지네이션 필요 시 limit/offset을 프런트에서 요청 본문에 넣어 호출
+- 다운로드:
+    - 프런트: dynamic-search.js의 downloadResults()는 자동으로 /api/download-search/dataA/<새-서브카테고리> 호출
+    - 백엔드: 공통 엔드포인트 사용. 파일 확장자는 요청 file_format과 일치하도록 생성
+
+DataC 추가 체크리스트
+
+- 네비게이션:
+    - Project/public/static/search.html에 링크 추가: /search/dataC/success/<새-서브카테고리> 또는 /search/dataC/failed/<새-서브카테고리>
+- 프런트 설정(필드/검색/다운로드):
+    - Project/config/field_settings.json에 dataC.success.<새-서브카테고리>와(또는) dataC.failed.<새-서브카테고리> 블록 각각 추가
+    - 구성 항목은 dataA와 동일(표시/검색/다운로드 필드)
+- 백엔드 데이터 경로:
+    - Project/api/main.py → get_data_file_path_c(...) 매핑 딕셔너리에 ( "dataC", "success|failed", "<새-서브카테고리>" ): os.getenv("BLOB_URL_DATAC_SUCCESS|
+FAILED_...") 추가
+    - Vercel 환경변수에 BLOB_URL_DATAC_SUCCESS_*/FAILED_* 추가
+- DuckDB/검색:
+    - 프런트는 /api/search/dataC/<result_type>/<subcategory> 자동 호출
+    - 필드명이 cert_date 등 YYYYMMDD 형태면 정렬/변환 로직 자동 적용
+- 다운로드:
+    - 프런트: /api/download-search/dataC/<result_type>/<subcategory> 자동 호출
+    - 백엔드: request_search_download_data_c_internal의 background_tasks.add_task(...) 인자 순서/내용 반드시 수정(파일 경로 포함, 조건 dict 전달)
+
+공통(두 카테고리 공히)
+
+- 라우팅/정적:
+    - vercel.json는 이미 /search/* → search.html로 라우팅됨. 새 링크만 추가하면 OK
+- 프런트 URL 파싱:
+    - Project/public/static/js/dynamic-search.js는 /search/dataA/...와 /search/dataC/success|failed/...를 기본 지원
+    - 만약 /search/<임의-슬러그> 같은 커스텀 경로를 쓰려면 categoryMapping에 매핑 추가
+- 설정 API:
+    - 프런트는 우선 /api/settings/...로 호출 → 실패 시 /api/config/...로 폴백
+    - display_config_manager가 field_settings.json을 읽어 클라이언트용 설정으로 변환
+- 환경변수:
+    - 로컬 개발에서 DataC는 기본 폴백 경로가 success/safetykorea에만 존재하므로 필요 시 로컬 폴백도 보강
+- DuckDB 설정:
+    - Blob(URL)이면 DuckDB 사용. DUCKDB_SUPPORTED_SOURCES 상수를 쓰려면 새 소스 키 추가 또는 Blob일 때 무조건 DuckDB 사용으로 단순화
+- 다운로드 포맷:
+    - 서버 create_temp_file(temp_id, file_format)로 생성 확장자와 실제 포맷 일치 유지
+
+QA 체크리스트
+
+- 링크/경로:
+    - /search/dataA/<새-서브카테고리> 또는 /search/dataC/success|failed/<새-서브카테고리> 접속 시 페이지 로드 OK
+- 설정 로드:
+    - 네트워크 탭에서 /api/settings/... 200 응답, displayFields, searchFields 정상
+- 검색:
+    - /api/search/... 200 응답, results 채워짐, 정렬/표시 필드 기대대로
+- 다운로드:
+    - /api/download-search/... 200 응답 → /api/status/<temp_id> 진행률 → /api/download/file/<temp_id> 다운로드 동작
+    - 파일 확장자/내용 일치
+- 대용량:
+    - 키워드 없이 바로 “전체” 검색 시 서버사이드 제한(limit) 유효, 타임아웃/메모리 문제 없는지
+
+권장 명명 규칙
+
+- URL 슬러그와 field_settings.json의 서브카테고리 키 일치
+- Blob 환경변수는 일관된 접두사 사용:
+    - DataA: BLOB_URL_DATAA_<번호>_<대문자-키>
+    - DataC: BLOB_URL_DATAC_SUCCESS|FAILED_<번호>_<대문자-키>
+해 드릴게요.원

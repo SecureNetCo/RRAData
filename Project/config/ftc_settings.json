@@ -1,0 +1,79 @@
+{
+  "display_fields": [
+    {
+      "field": "ftc_business_number",
+      "name": "사업자번호",
+      "width": "12%",
+      "type": "text",
+      "align": "center",
+      "sortable": true,
+      "searchable": true
+    },
+    {
+      "field": "ftc_representative",
+      "name": "대표자명",
+      "width": "10%",
+      "type": "text",
+      "align": "left",
+      "sortable": true,
+      "searchable": true
+    },
+    {
+      "field": "ftc_phone",
+      "name": "전화번호",
+      "width": "12%",
+      "type": "text",
+      "align": "center",
+      "sortable": true,
+      "searchable": true
+    },
+    {
+      "field": "ftc_email",
+      "name": "이메일",
+      "width": "15%",
+      "type": "text",
+      "align": "left",
+      "sortable": true,
+      "searchable": true
+    }
+  ],
+  "download_fields": [
+    "ftc_sale_number",
+    "ftc_company_name",
+    "ftc_business_number",
+    "ftc_representative",
+    "ftc_phone",
+    "ftc_email",
+    "ftc_address",
+    "ftc_road_address",
+    "ftc_website",
+    "ftc_registration_date",
+    "ftc_business_status",
+    "ftc_agency_name",
+    "ftc_products",
+    "ftc_sales_method"
+  ],
+  "search_fields": [
+    {
+      "field": "ftc_business_number",
+      "name": "사업자번호",
+      "placeholder": "사업자번호로 검색"
+    }
+  ],
+  "field_types": {
+    "ftc_sale_number": "varchar",
+    "ftc_company_name": "varchar",
+    "ftc_business_number": "varchar",
+    "ftc_representative": "varchar",
+    "ftc_phone": "varchar",
+    "ftc_email": "varchar",
+    "ftc_address": "varchar",
+    "ftc_road_address": "varchar",
+    "ftc_website": "varchar",
+    "ftc_registration_date": "varchar",
+    "ftc_business_status": "varchar",
+    "ftc_agency_name": "varchar",
+    "ftc_products": "varchar",
+    "ftc_sales_method": "varchar"
+  }
+}

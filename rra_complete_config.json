@@ -1,0 +1,294 @@
+{
+  "rra-cert": {
+    "category_info": {
+      "display_name": "RRA 인증정보",
+      "description": "RRA(방송통신기자재 적합성평가) 인증 제품 정보",
+      "icon": "radio",
+      "data_file": "parquet/11_rra_cert_flattened.parquet",
+      "is_large_file": true,
+      "data_path": "root"
+    },
+    "display_fields": [
+      {
+        "field": "cert_no",
+        "name": "인증번호",
+        "width": "15%",
+        "type": "text",
+        "align": "center",
+        "sortable": true,
+        "searchable": true
+      },
+      {
+        "field": "material_name",
+        "name": "기자재명",
+        "width": "20%",
+        "type": "text",
+        "align": "left",
+        "sortable": true,
+        "searchable": true
+      },
+      {
+        "field": "basic_model",
+        "name": "기본모델명",
+        "width": "15%",
+        "type": "text",
+        "align": "left",
+        "sortable": true,
+        "searchable": true
+      },
+      {
+        "field": "business_name",
+        "name": "업체명",
+        "width": "15%",
+        "type": "text",
+        "align": "left",
+        "sortable": true,
+        "searchable": true
+      },
+      {
+        "field": "manufacturer",
+        "name": "제조자",
+        "width": "12%",
+        "type": "text",
+        "align": "left",
+        "sortable": true,
+        "searchable": true
+      },
+      {
+        "field": "country",
+        "name": "제조국가",
+        "width": "8%",
+        "type": "text",
+        "align": "center",
+        "sortable": true,
+        "searchable": false
+      },
+      {
+        "field": "cert_date",
+        "name": "인증일자",
+        "width": "10%",
+        "type": "date",
+        "format": "YYYY-MM-DD",
+        "align": "center",
+        "sortable": true,
+        "searchable": false
+      },
+      {
+        "field": "derived_models",
+        "name": "파생모델",
+        "width": "5%",
+        "type": "text",
+        "align": "center",
+        "sortable": false,
+        "searchable": false
+      }
+    ],
+    "download_fields": [
+      "cert_no",
+      "material_name",
+      "basic_model",
+      "business_name",
+      "manufacturer",
+      "country",
+      "cert_date",
+      "derived_models",
+      "etc_matter"
+    ],
+    "search_fields": [
+      {
+        "field": "cert_no",
+        "name": "인증번호",
+        "placeholder": "인증번호로 검색"
+      },
+      {
+        "field": "material_name",
+        "name": "기자재명",
+        "placeholder": "기자재명으로 검색"
+      },
+      {
+        "field": "basic_model",
+        "name": "모델명",
+        "placeholder": "모델명으로 검색"
+      },
+      {
+        "field": "business_name",
+        "name": "업체명",
+        "placeholder": "업체명으로 검색"
+      },
+      {
+        "field": "manufacturer",
+        "name": "제조자",
+        "placeholder": "제조자로 검색"
+      }
+    ],
+    "field_types": {
+      "cert_no": "text",
+      "business_name": "text",
+      "material_name": "text",
+      "basic_model": "text",
+      "derived_models": "text",
+      "manufacturer": "text",
+      "country": "text",
+      "cert_date": "date",
+      "etc_matter": "text",
+      "crawled_at": "datetime"
+    },
+    "ui_settings": {
+      "default_sort": {
+        "field": "cert_date",
+        "direction": "desc"
+      },
+      "items_per_page": 20,
+      "enable_search": true,
+      "enable_download": true,
+      "enable_pagination": true,
+      "show_total_count": true
+    }
+  },
+  "rra-self-cert": {
+    "category_info": {
+      "display_name": "RRA 자기적합성선언",
+      "description": "RRA 자기적합성선언 제품 정보",
+      "icon": "clipboard-check",
+      "data_file": "parquet/12_rra_self_cert_flattened.parquet",
+      "is_large_file": false,
+      "data_path": "root"
+    },
+    "display_fields": [
+      {
+        "field": "cert_no",
+        "name": "신고번호",
+        "width": "15%",
+        "type": "text",
+        "align": "center",
+        "sortable": true,
+        "searchable": true
+      },
+      {
+        "field": "material_name",
+        "name": "기자재명",
+        "width": "20%",
+        "type": "text",
+        "align": "left",
+        "sortable": true,
+        "searchable": true
+      },
+      {
+        "field": "basic_model",
+        "name": "기본모델명",
+        "width": "15%",
+        "type": "text",
+        "align": "left",
+        "sortable": true,
+        "searchable": true
+      },
+      {
+        "field": "business_name",
+        "name": "업체명",
+        "width": "15%",
+        "type": "text",
+        "align": "left",
+        "sortable": true,
+        "searchable": true
+      },
+      {
+        "field": "manufacturer",
+        "name": "제조자",
+        "width": "12%",
+        "type": "text",
+        "align": "left",
+        "sortable": true,
+        "searchable": true
+      },
+      {
+        "field": "country",
+        "name": "제조국가",
+        "width": "8%",
+        "type": "text",
+        "align": "center",
+        "sortable": true,
+        "searchable": false
+      },
+      {
+        "field": "cert_date",
+        "name": "신고일자",
+        "width": "10%",
+        "type": "date",
+        "format": "YYYY-MM-DD",
+        "align": "center",
+        "sortable": true,
+        "searchable": false
+      },
+      {
+        "field": "derived_models",
+        "name": "파생모델",
+        "width": "5%",
+        "type": "text",
+        "align": "center",
+        "sortable": false,
+        "searchable": false
+      }
+    ],
+    "download_fields": [
+      "cert_no",
+      "material_name",
+      "basic_model",
+      "business_name",
+      "manufacturer",
+      "country",
+      "cert_date",
+      "derived_models",
+      "etc_matter"
+    ],
+    "search_fields": [
+      {
+        "field": "cert_no",
+        "name": "신고번호",
+        "placeholder": "신고번호로 검색"
+      },
+      {
+        "field": "material_name",
+        "name": "기자재명",
+        "placeholder": "기자재명으로 검색"
+      },
+      {
+        "field": "basic_model",
+        "name": "모델명",
+        "placeholder": "모델명으로 검색"
+      },
+      {
+        "field": "business_name",
+        "name": "업체명",
+        "placeholder": "업체명으로 검색"
+      },
+      {
+        "field": "manufacturer",
+        "name": "제조자",
+        "placeholder": "제조자로 검색"
+      }
+    ],
+    "field_types": {
+      "cert_no": "text",
+      "business_name": "text",
+      "material_name": "text",
+      "basic_model": "text",
+      "derived_models": "text",
+      "manufacturer": "text",
+      "country": "text",
+      "cert_date": "date",
+      "etc_matter": "text",
+      "error": "text"
+    },
+    "ui_settings": {
+      "default_sort": {
+        "field": "cert_date",
+        "direction": "desc"
+      },
+      "items_per_page": 20,
+      "enable_search": true,
+      "enable_download": true,
+      "enable_pagination": true,
+      "show_total_count": true
+    }
+  }
+}

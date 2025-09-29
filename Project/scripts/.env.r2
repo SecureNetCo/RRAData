@@ -1,0 +1,50 @@
+# Cloudflare R2 Environment Variables
+# Generated automatically for DataPage project
+# Total: 39 variables (DataA:12 + DataB:1 + DataC Success:13 + DataC Failed:13)
+
+# DataA URLs (12개 - wadiz 제외)
+R2_URL_DATAA_1_SAFETYKOREA=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/1_safetykorea_flattened.parquet
+R2_URL_DATAA_3_EFFICIENCY=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/3_efficiency_flattened.parquet
+R2_URL_DATAA_4_HIGH_EFFICIENCY=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/4_high_efficiency_flattened.parquet
+R2_URL_DATAA_5_STANDBY_POWER=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/5_standby_power_flattened.parquet
+R2_URL_DATAA_6_APPROVAL=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/6_approval_flattened.parquet
+R2_URL_DATAA_7_DECLARE=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/7_declare_flattened.parquet
+R2_URL_DATAA_8_KWTC=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/8_kwtc_flattened.parquet
+R2_URL_DATAA_9_RECALL=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/9_recall_flattened.parquet
+R2_URL_DATAA_10_SAFETYKOREACHILD=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/10_safetykoreachild_flattened.parquet
+R2_URL_DATAA_11_RRA_CERT=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/11_rra_cert_flattened.parquet
+R2_URL_DATAA_12_RRA_SELF_CERT=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/12_rra_self_cert_flattened.parquet
+R2_URL_DATAA_13_SAFETYKOREAHOME=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/13_safetykoreahome_flattened.parquet
+
+# DataB URL (1개)
+R2_URL_DATAB_2_WADIZ=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/2_wadiz_flattened.parquet
+
+# DataC Success URLs (13개)
+R2_URL_DATAC_SUCCESS_1_SAFETYKOREA=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/1_safetykorea_flattened_success.parquet
+R2_URL_DATAC_SUCCESS_2_WADIZ=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/2_wadiz_flattened_success.parquet
+R2_URL_DATAC_SUCCESS_3_EFFICIENCY=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/3_efficiency_flattened_success.parquet
+R2_URL_DATAC_SUCCESS_4_HIGH_EFFICIENCY=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/4_high_efficiency_flattened_success.parquet
+R2_URL_DATAC_SUCCESS_5_STANDBY_POWER=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/5_standby_power_flattened_success.parquet
+R2_URL_DATAC_SUCCESS_6_APPROVAL=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/6_approval_flattened_success.parquet
+R2_URL_DATAC_SUCCESS_7_DECLARE=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/7_declare_flattened_success.parquet
+R2_URL_DATAC_SUCCESS_8_KWTC=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/8_kwtc_flattened_success.parquet
+R2_URL_DATAC_SUCCESS_9_RECALL=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/9_recall_flattened_success.parquet
+R2_URL_DATAC_SUCCESS_10_SAFETYKOREACHILD=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/10_safetykoreachild_flattened_success.parquet
+R2_URL_DATAC_SUCCESS_11_RRA_CERT=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/11_rra_cert_flattened_success.parquet
+R2_URL_DATAC_SUCCESS_12_RRA_SELF_CERT=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/12_rra_self_cert_flattened_success.parquet
+R2_URL_DATAC_SUCCESS_13_SAFETYKOREAHOME=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/13_safetykoreahome_flattened_success.parquet
+
+# DataC Failed URLs (13개)
+R2_URL_DATAC_FAILED_1_SAFETYKOREA=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/1_safetykorea_flattened_failed.parquet
+R2_URL_DATAC_FAILED_2_WADIZ=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/2_wadiz_flattened_failed.parquet
+R2_URL_DATAC_FAILED_3_EFFICIENCY=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/3_efficiency_flattened_failed.parquet
+R2_URL_DATAC_FAILED_4_HIGH_EFFICIENCY=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/4_high_efficiency_flattened_failed.parquet
+R2_URL_DATAC_FAILED_5_STANDBY_POWER=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/5_standby_power_flattened_failed.parquet
+R2_URL_DATAC_FAILED_6_APPROVAL=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/6_approval_flattened_failed.parquet
+R2_URL_DATAC_FAILED_7_DECLARE=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/7_declare_flattened_failed.parquet
+R2_URL_DATAC_FAILED_8_KWTC=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/8_kwtc_flattened_failed.parquet
+R2_URL_DATAC_FAILED_9_RECALL=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/9_recall_flattened_failed.parquet
+R2_URL_DATAC_FAILED_10_SAFETYKOREACHILD=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/10_safetykoreachild_flattened_failed.parquet
+R2_URL_DATAC_FAILED_11_RRA_CERT=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/11_rra_cert_flattened_failed.parquet
+R2_URL_DATAC_FAILED_12_RRA_SELF_CERT=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/12_rra_self_cert_flattened_failed.parquet
+R2_URL_DATAC_FAILED_13_SAFETYKOREAHOME=https://pub-4e8cc58b92d64abea92f66878f367f88.r2.dev/datapage-parquet/13_safetykoreahome_flattened_failed.parquet

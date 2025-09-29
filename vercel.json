@@ -1,0 +1,20 @@
+{
+  "builds": [
+    {
+      "src": "Project/api/main.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "Project/public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/api/(.*)", "dest": "Project/api/main.py" },
+    { "src": "/static/(.*)", "dest": "Project/public/static/$1" },
+    { "src": "/search/(.*)", "dest": "Project/public/static/search.html" },
+    { "src": "/", "dest": "Project/public/static/search.html" },
+    { "src": "/(.*)", "dest": "Project/public/static/search.html" }
+  ]
+}

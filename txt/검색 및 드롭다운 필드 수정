@@ -1,0 +1,90 @@
+1. 화면 표시 컬럼 제거
+
+- 대상: 결과 테이블에 보이는 컬럼
+- 방법: Project/config/field_settings.json의 해당 카테고리 설정에서 display_fields에서 빼기
+    - dataA: dataA.<subcategory>.display_fields 배열에서 삭제
+    - dataC: dataC.success.<subcategory>.display_fields 또는 dataC.failed.<subcategory>.display_fields에서 삭제
+    - 필드 항목은 { field, name, type, width, ... } 형태의 객체이므로, 지우려는 필드 객체를 배열에서 제거
+- 적용: 서버리스는 런타임에 파일을 다시 안 읽으니 보통 재배포(혹은 서버 재시작) 필요
+- 즉시 확인: 페이지 새로고침 → 해당 컬럼이 없어져야 정상
+
+2. 검색 드롭다운 옵션 제거
+
+- 대상: 검색창 왼쪽 드롭다운의 옵션
+- 방법: 같은 설정 파일에서 search_fields에서 빼기
+    - dataA: dataA.<subcategory>.search_fields
+    - dataC: dataC.success.<subcategory>.search_fields 또는 dataC.failed.<subcategory>.search_fields
+
+3. 다운로드 파일에서 컬럼 제거
+
+- 대상: 엑셀/CSV/JSON 다운로드에 포함되는 컬럼
+- 원칙: download_fields에 포함된 필드만 내리고 싶다면, 현재 코드상 생성기가 download_fields를 직접 적용하지 않습니다. 두 가지 중 하나를 권장합니다.
+    - 간단한 현실적 방법: 검색 결과 데이터에서 불필요 키를 제거한 리스트를 만들어 generate_file_background에 넘기기(프론트/백엔드 한쪽에서 필터링).
+    - 구조 개선 방법(권장): file_generator에서 metadata로 download_fields를 받아, 열 생성 시 화이트리스트 필터 적용하도록 반영.
+- 지금 즉시 하고 싶은 경우: download_fields도 field_settings.json에 정리해두세요(향후 생성기 반영 시 그대로 사용 가능).
+
+API로 즉시 바꾸고 싶은 경우(비권장: Vercel에선 비영구적)
+
+- 화면 컬럼만 임시로 바꾸려면:
+    - 2-파라미터(dataA 등): PUT /api/settings/{category}/{subcategory} 로 displayFields를 새 배열로 보내기
+    - 3-파라미터(dataC): GET /api/settings/dataC/{result_type}/{subcategory}로 현재 설정 확인 → PUT으로 displayFields에서 제거
+- 주의: 서버리스에선 /tmp 등에만 저장되어 콜드스타트 후 사라질 수 있어, 영구 변경은 field_settings.json 수정이 안전합니다.
+
+작업 순서 요약
+
+- 어떤 페이지인지 URL로 확인: /search/dataA/<sub> 또는 /search/dataC/(success|failed)/<sub>
+- Project/config/field_settings.json에서 해당 블록 찾기
+    - dataA: "dataA": { "<sub>": { display_fields: [...] }}
+    - dataC: "dataC": { "success": { "<sub>": {...} }, "failed": { "<sub>": {...} } }
+- display_fields에서 지울 필드 객체 제거
+- 필요하면 search_fields에서도 옵션 제거
+- 다운로드에서 빼고 싶으면 당장은 결과 데이터에서 키 제거(또는 생성기 개선)
+- 재배포 후 브라우저 새로고침으로 확인
+
+------------------------------------------------------
+드롭다운 추가
+수정 위치
+
+- Project/config/field_settings.json
+    - dataA: dataA.<subcategory>.search_fields 배열에 항목 추가
+    - dataC: dataC.success.<subcategory>.search_fields 및/또는 dataC.failed.<subcategory>.search_fields에 추가
+- 프런트/JS: 별도 수정 불필요
+    - dynamic-search.js는 /api/settings/... 응답의 searchFields를 자동으로 드롭다운으로 렌더링합니다.
+
+추가 항목 형식
+
+- 각 항목: {"field": "<검색키>", "name": "<표시명>", "placeholder": "<도움말>"}
+- 예시
+    - 추상 키(권장): {"field": "product_name", "name": "제품명", "placeholder": "제품명으로 검색"}
+    - 실제 컬럼: {"field": "인증번호", "name": "인증번호", "placeholder": "인증번호로 검색"}
+- 주의: "all"은 사용하지 마세요. 현재 로직상 전체검색이 의도치 않게 전량 반환될 수 있습니다.
+
+권장 검색키 선택
+
+- 추상 키 3종은 DuckDB 매핑이 이미 있음:
+    - model_name → ["모델명","model_name"]
+    - product_name → ["제품명","product_name","품목명",...]
+- 실제 컬럼명을 쓰고 싶으면, 해당 컬럼이 Parquet 스키마에 반드시 존재해야 합니다.
+
+백엔드 검색 지원 확인
+
+- DuckDB 매핑 확장 필요 시
+    - 파일: Project/core/duckdb_processor.py
+    - 위치: _build_where_clause()의 field_mappings에 새 추상 키를 추가하거나, 기존 키의 후보 컬럼을 보강
+- ijson(스트리밍) 폴백 매핑(드물게 사용)
+    - 파일: Project/api/main.py
+    - 함수: search_in_fields()의 field_mappings도 같은 방식으로 보강
+
+런타임(임시) 변경 옵션
+
+- 영구 반영은 field_settings.json 수정이 가장 안전하지만, 임시로 API로도 가능:
+    - 2-파라미터(dataA 등): PUT /api/settings/{category}/{subcategory}
+    - 3-파라미터(dataC): PUT /api/settings/dataC/{result_type}/{subcategory}
+    - 바디에 searchFields 배열 포함. 단, 서버리스 특성상 콜드스타트 후 유실될 수 있음.
+
+검증 절차
+
+- 페이지 접속: /search/dataA/<sub> 혹은 /search/dataC/success|failed/<sub>
+- 네트워크 탭: /api/settings/... 응답에 searchFields에 새 옵션 포함 확인
+- 드롭다운 표시 및 선택 → 검색 실행 시 결과 필터링 정상 동작
+- 대소문자/부분일치: LIKE 검색이므로 일반 텍스트 검색 기대대로 동작

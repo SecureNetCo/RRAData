@@ -1,0 +1,46 @@
+name: Sync to Personal Repository
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # 수동 실행 가능하게
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout source repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 전체 히스토리 가져오기
+        persist-credentials: false  # 기본 credential 비활성화
+
+    - name: Configure Git
+      run: |
+        git config --global user.name "SecureNetCo"
+        git config --global user.email "actions@github.com"
+        git config --global credential.helper store
+
+    - name: Setup Git Credentials
+      run: |
+        echo "https://${{ secrets.PERSONAL_TOKEN }}@github.com" > ~/.git-credentials
+
+    - name: Add personal repository as remote
+      run: |
+        git remote remove personal 2>/dev/null || true
+        git remote add personal https://${{ secrets.PERSONAL_TOKEN }}@github.com/SecureNetCo/datapage-search.git
+        git remote -v
+
+    - name: Push to personal repository
+      run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+        git fetch personal main || true
+        git push personal HEAD:refs/heads/main --force --force-with-lease
+        
+    # - name: Trigger Vercel deployment
+    #   run: |
+    #     curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_LbaKT84O4PphazHXT0Bh8GmZQmix/CLvRzOINIa"

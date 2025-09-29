@@ -1,0 +1,76 @@
+codex
+다 살펴봤어요. 결론부터 말하면, 검색·페이지 이동은 대체로 맞춰져 있지만, 다운로드(특히 dataC)와 DuckDB/Blob 연동, 서버리스 환경 제약에서 몇 가지 치명/잠재 이슈가
+있습니다.
+
+핵심 요약
+
+- DataC 전체 다운로드 API: 잘못된 인자 순서로 100% 실패.
+- DUCKDB_SUPPORTED_SOURCES 미정의: 특정 API 호출 시 NameError 위험.
+- Blob(URL) 데이터에 로컬 파일 전용 로직을 호출: 보조 API들 실패 가능.
+- 서버리스(Vercel)에서 BackgroundTasks 기반 파일 생성: 장시간 작업 불가 위험.
+- 검색 응답이 “limit 없음(전체)” 설계: 대용량에서 메모리/타임아웃 위험.
+
+주요 에러 포인트
+
+- Project/api/main.py DataC 다운로드
+    - 위치: request_search_download_data_c_internal(...)의 background_tasks.add_task(...)
+    - 문제: generate_file_background 인자 순서/개수 오기입. file_path를 전달하지 않고, search_conditions에 문자열을 넘김.
+    - 영향: 런타임에서 “positional argument missing” 또는 'str' object has no attribute 'get'로 즉시 실패.
+    - 수정 제안:
+    - 생성한 `file_path`를 3번째로 전달하고, 5번째 인자에 dict로 검색조건을 전달.
+    - 예:
+      - 기존: `generate_file_background, temp_id, all_results, request.file_format, f"{...}"`
+      - 수정: `generate_file_background, temp_id, all_results, file_path, request.file_format, {"category": category, "result_type": result_type, "subcategory":
+subcategory, "keyword": request.keyword, "search_field": request.search_field, "total_results": len(all_results)}`
+
+- DUCKDB_SUPPORTED_SOURCES 미정의
+    - 위치: Project/api/main.py (참조만 있고 정의 없음)
+    - 영향: /api/system/status, filter_data_by_conditions 실행 시 NameError.
+    - 수정 제안:
+    - 상단에 정의 추가하거나, 아예 Blob URL인 경우에는 DuckDB를 강제하도록 단순화.
+    - 예: `DUCKDB_SUPPORTED_SOURCES = {"dataA/safetykorea", "dataB/wadiz-makers", "dataC/success/safetykorea", ...}` 혹은 `is_blob_url=True면 DuckDB 사용`.
+
+- Blob(URL)에서 로컬 전용 처리기 호출
+    - 위치:
+    - `get_file_info`: Blob이면 `get_large_file_metadata(data_file_path)` 호출 → 내부적으로 `LargeFileProcessor(file_path)`가 로컬 파일 존재 여부를 요구해 실패.
+    - `get_field_samples`: Blob이면 `get_processor(...)` 호출 → 동일 문제.
+- 영향: Blob 기반 환경에서 두 엔드포인트 500 오류 가능.
+- 수정 제안:
+    - Blob(URL)일 때는 DuckDB로 샘플/메타를 구하기.
+      - 예: `duckdb_search_large_file(..., limit=1)` 후 컬럼/레코드로 메타 도출, `SELECT DISTINCT`/`LIMIT`로 샘플 구하기.
+    - 로컬 파일일 때만 `LargeFileProcessor` 사용.
+
+- 다운로드 파일 확장자 불일치
+    - 위치: /api/download, /api/download-search/*
+    - 문제: 항상 create_temp_file(temp_id, "xlsx")로 경로를 만들고, 요청 file_format에 따라 CSV/JSON을 생성할 수 있어 “CSV인데 .xlsx” 같은 불일치 발생.
+    - 수정 제안: create_temp_file(temp_id, request.file_format)으로 생성하고, 상태/다운로드 응답에서도 해당 포맷을 일관되게 사용.
+
+설계/성능 리스크
+
+    - FastAPI BackgroundTasks는 Vercel 서버리스 수명 내에서만 동작. 큰 엑셀 생성은 타임아웃/중단 위험.
+    - 권장: 결과 파일을 바로 Vercel Blob에 스트리밍 업로드하고 서명 URL을 반환하거나, 외부 큐/잡(예: 별도 워커)로 오프로드.
+- 검색 “limit=null”로 전체 반환
+    - 프런트 페이지네이션은 클라이언트 메모리에 모든 결과를 올린 뒤 조각내는 방식이라 대용량 시 위험.
+    - 권장: 서버 사이드 페이지네이션(limit, offset)로 응답 범위를 제한하고, 프런트는 현재 페이지 기준으로만 요청.
+
+환경 변수 체크(필수)
+
+- 아래 Blob URL들이 Vercel 환경 변수에 설정되어야 검색/다운로드가 동작합니다. 하나라도 누락 시 500/404 유발.
+    - BLOB_URL_DATAA_1_SAFETYKOREA, BLOB_URL_DATAA_2_WADIZ, BLOB_URL_DATAA_3_EFFICIENCY, BLOB_URL_DATAA_4_HIGH_EFFICIENCY, BLOB_URL_DATAA_5_STANDBY_POWER,
+BLOB_URL_DATAA_6_APPROVAL, BLOB_URL_DATAA_7_DECLARE, BLOB_URL_DATAA_8_KC_CERTIFICATION, BLOB_URL_DATAA_9_RECALL, BLOB_URL_DATAA_10_SAFETYKOREACHILD
+    - BLOB_URL_DATAC_SUCCESS_1_SAFETYKOREA, ..._2_WADIZ, ..._3_EFFICIENCY, ..._4_HIGH_EFFICIENCY, ..._5_STANDBY_POWER, ..._9_RECALL, ..._10_SAFETYKOREACHILD
+    - BLOB_URL_DATAC_FAILED_1_SAFETYKOREA, ..._2_WADIZ, ..._3_EFFICIENCY, ..._4_HIGH_EFFICIENCY, ..._5_STANDBY_POWER, ..._6_APPROVAL, ..._7_DECLARE, ..._8_KC_CERTIFICATION, ..._9_RECALL, ..._10_SAFETYKOREACHILD
+
+권장 수정 코드
+
+- Project/api/main.py DataC 다운로드 인자 수정
+    - background_tasks.add_task(generate_file_background, temp_id, all_results, file_path, request.file_format, {"category": category, "result_type": result_type,
+"subcategory": subcategory, "keyword": request.keyword, "search_field": request.search_field, "total_results": len(all_results)})
+- DUCKDB_SUPPORTED_SOURCES 정의 추가 또는 Blob은 무조건 DuckDB 사용 분기
+    - 간단히: Blob URL이면 use_duckdb = True 처리.
+- 임시파일 생성 시 포맷 반영
+    - file_path = temp_file_manager.create_temp_file(temp_id, request.file_format)
+- Blob일 때 보조 API는 DuckDB 사용
+    - get_file_info, get_field_samples에서 is_blob_url이면 DuckDB로 처리.
+
+원하시면 위 이슈들 바로 패치해서 테스트까지 진행해 드릴게요. (우선 DataC 다운로드와 DUCKDB 상수 정의부터 잡는 것을 추천합니다.)
