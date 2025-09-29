@@ -373,6 +373,11 @@ class DynamicSearchEngine {
             return;
         }
 
+        if (keyword.length < 2) {
+            this.showMessage('검색어는 2글자 이상 입력해주세요.', 'warning');
+            return;
+        }
+
         // 새로운 검색인 경우 페이지를 1로 초기화
         if (!keywordParam) {
             this.currentPage = 1;
