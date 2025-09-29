@@ -788,14 +788,12 @@ footer {
 }
 
 .results-table td:not([data-type="image"]) {
-    /* 텍스트를 가로로 표시하면서 1줄 제한 */
-    max-height: 1.4em; /* line-height 1.4 * 1줄 */
-    overflow: hidden;
+    /* 텍스트를 완전히 표시하고 가로 스크롤 사용 */
     line-height: 1.4;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    white-space: nowrap; /* 한 줄로 유지하되 ellipsis 제거 */
     word-wrap: break-word;
     word-break: break-word;
+    min-width: 100px; /* 최소 너비 보장 */
 }
 
 .results-table td[data-type="image"] {

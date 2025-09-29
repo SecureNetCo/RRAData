@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DataPage - 검색</title>
+    <title>모두의 인증</title>
     <!-- Cache bust: v1.1 -->
     
     <!-- CSS -->
@@ -12,14 +12,14 @@
 </head>
 <body>
     <header>
-        <h1><a href="/" style="color: white; text-decoration: none;">DataPage</a></h1>
+        <h1><a href="/" style="color: white; text-decoration: none;">모두의 인증</a></h1>
         <nav class="main-nav">
             <ul>
                 <li class="has-submenu">
                     <a href="#">인증검색</a>
                     <ul>
-                        <li><a href="/search/dataA/rra-self-conformity">RRA 자기적합 인증</a></li>
                         <li><a href="/search/dataA/rra-certification">RRA 적합등록 인증</a></li>
+                        <li><a href="/search/dataA/rra-self-conformity">RRA 자기적합 인증</a></li>
                     </ul>
                 </li>
             </ul>
@@ -83,7 +83,7 @@
     </div>
 
     <footer>
-        <p>© DataPage</p>
+        <p>© 모두의 인증</p>
     </footer>
 
     <!-- 다운로드 모달 -->
@@ -147,5 +147,17 @@
     <script src="/static/js/dynamic-search.js"></script>
     <script src="/static/js/cold-start-monitor.js"></script>
     <script src="/static/js/smart-prefetch.js"></script>
+
+    <!-- 자동 리다이렉트 -->
+    <script>
+        // 페이지 로드시 RRA 적합등록 인증으로 자동 리다이렉트
+        window.addEventListener('DOMContentLoaded', function() {
+            // 현재 URL이 메인 페이지('/') 또는 '/search/'인 경우에만 리다이렉트
+            const currentPath = window.location.pathname;
+            if (currentPath === '/' || currentPath === '/search/' || currentPath === '/search') {
+                window.location.href = '/search/dataA/rra-certification';
+            }
+        });
+    </script>
 </body>
 </html>

@@ -1671,15 +1671,6 @@
           "searchable": true
         },
         {
-          "field": "manufacturer",
-          "name": "제조자",
-          "width": "12%",
-          "type": "text",
-          "align": "left",
-          "sortable": true,
-          "searchable": true
-        },
-        {
           "field": "country",
           "name": "제조국가",
           "width": "8%",
@@ -1696,15 +1687,6 @@
           "format": "YYYY-MM-DD",
           "align": "center",
           "sortable": true,
-          "searchable": false
-        },
-        {
-          "field": "derived_models",
-          "name": "파생모델",
-          "width": "5%",
-          "type": "text",
-          "align": "center",
-          "sortable": false,
           "searchable": false
         }
       ],
@@ -1739,11 +1721,6 @@
           "field": "business_name",
           "name": "업체명",
           "placeholder": "업체명으로 검색"
-        },
-        {
-          "field": "manufacturer",
-          "name": "제조자",
-          "placeholder": "제조자로 검색"
         }
       ],
       "field_types": {
@@ -1817,15 +1794,6 @@
           "searchable": true
         },
         {
-          "field": "manufacturer",
-          "name": "제조자",
-          "width": "12%",
-          "type": "text",
-          "align": "left",
-          "sortable": true,
-          "searchable": true
-        },
-        {
           "field": "country",
           "name": "제조국가",
           "width": "8%",
@@ -1842,15 +1810,6 @@
           "format": "YYYY-MM-DD",
           "align": "center",
           "sortable": true,
-          "searchable": false
-        },
-        {
-          "field": "derived_models",
-          "name": "파생모델",
-          "width": "5%",
-          "type": "text",
-          "align": "center",
-          "sortable": false,
           "searchable": false
         }
       ],
@@ -1885,11 +1844,6 @@
           "field": "business_name",
           "name": "업체명",
           "placeholder": "업체명으로 검색"
-        },
-        {
-          "field": "manufacturer",
-          "name": "제조자",
-          "placeholder": "제조자로 검색"
         }
       ],
       "field_types": {
