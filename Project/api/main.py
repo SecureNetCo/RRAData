@@ -562,9 +562,9 @@ async def search_category_data(category: str, subcategory: str, request: SearchR
     카테고리별 검색 - DuckDB + Parquet 전용
     """
     try:
-        # 빈 검색어 검증
-        if not request.keyword or len(request.keyword.strip()) < 2:
-            raise HTTPException(status_code=400, detail="검색어는 2글자 이상 입력해주세요")
+        # 빈 검색어 검증 (정확 매칭을 위해 길이 제한 제거)
+        if not request.keyword or not request.keyword.strip():
+            raise HTTPException(status_code=400, detail="검색어를 입력해주세요")
 
         # Parquet 데이터 파일 URL 가져오기
         data_file_path = get_data_file_path(category, subcategory)
@@ -1256,170 +1256,34 @@ def get_data_file_path(category: str, subcategory: str, prefer_r2: bool = False)
     # 🎯 DATA_MODE 환경변수로 모드 결정
     data_mode = os.getenv("DATA_MODE", "full").lower()
 
-    # Vercel Blob URL 매핑 (2025년 필터링된 데이터) - 환경변수 사용
-    blob_env_mapping = {
-        # DataA 매핑 (12개)
-        "safetykorea": "BLOB_URL_DATAA_1_SAFETYKOREA",
-        "efficiency-rating": "BLOB_URL_DATAA_3_EFFICIENCY",
-        "high-efficiency": "BLOB_URL_DATAA_4_HIGH_EFFICIENCY",
-        "standby-power": "BLOB_URL_DATAA_5_STANDBY_POWER",
-        "approval": "BLOB_URL_DATAA_6_APPROVAL",
-        "declaration-details": "BLOB_URL_DATAA_7_DECLARE",
-        "kwtc": "BLOB_URL_DATAA_8_KWTC",
-        "recall": "BLOB_URL_DATAA_9_RECALL",
-        "safetykoreachild": "BLOB_URL_DATAA_10_SAFETYKOREACHILD",
-        "rra-cert": "BLOB_URL_DATAA_11_RRA_CERT",
-        "rra-self-cert": "BLOB_URL_DATAA_12_RRA_SELF_CERT",
-        "safetykoreahome": "BLOB_URL_DATAA_13_SAFETYKOREAHOME",
-
-        # DataB 매핑 (1개)
-        "wadiz-makers": "BLOB_URL_DATAB_2_WADIZ",
+    # R2 URL 매핑 (field_settings.json에 설정된 항목들만)
+    r2_env_mapping = {
+        # DataA 매핑 (field_settings.json 기준 7개)
+        "safetykorea": "R2_URL_DATAA_SAFETYKOREA",
+        "safetykoreachild": "R2_URL_DATAA_SAFETYKOREACHILD",
+        "safetykoreahome": "R2_URL_DATAA_SAFETYKOREAHOME",
+        "approval": "R2_URL_DATAA_APPROVAL",
+        "declare": "R2_URL_DATAA_DECLARE",
+        "rra-cert": "R2_URL_DATAA_RRA_CERT",
+        "rra-self-cert": "R2_URL_DATAA_RRA_SELF_CERT",
     }
 
-    # 로컬 parquet 파일 경로 매핑 (2025년 필터링된 데이터)
-    local_file_mapping = {
-        # DataA 매핑
-        "safetykorea": "./parquet/1_safetykorea_flattened.parquet",
-        "kwtc": "./parquet/8_kwtc_flattened.parquet",
-        "rra-cert": "./parquet/11_rra_cert_flattened.parquet",     # RRA 인증
-        "rra-self-cert": "./parquet/12_rra_self_cert_flattened.parquet",  # RRA 자기적합성
-        "efficiency-rating": "./parquet/3_efficiency_flattened.parquet",
-        "high-efficiency": "./parquet/4_high_efficiency_flattened.parquet",
-        "standby-power": "./parquet/5_standby_power_flattened.parquet",
-        "approval": "./parquet/6_approval_flattened.parquet",           # 승인정보
-        "declaration-details": "./parquet/7_declare_flattened.parquet",
-        "recall": "./parquet/9_recall_flattened.parquet",
-        "safetykoreachild": "./parquet/10_safetykoreachild_flattened.parquet",
-        "safetykoreahome": "./parquet/13_safetykoreahome_flattened.parquet",
-        # DataB 매핑
-        "wadiz-makers": "./parquet/2_wadiz_flattened.parquet",  # 와디즈 메이커
-    }
+    # 로컬 파일은 사용하지 않음 (Vercel + R2 환경)
 
-    # 🟢 2025년 모드: Vercel Blob URL 우선 사용 (성능 최적화)
-    if not prefer_r2 and data_mode == "2025":
-        prefetched_path = get_prefetched_blob_path(category, subcategory)
-        if prefetched_path:
-            logger.info(f"2025년 모드 (Blob-prefetch): {category}/{subcategory} → {prefetched_path}")
-            return prefetched_path
-
-        # 1. Vercel Blob URL 사용 (환경변수에서)
-        blob_env_var = blob_env_mapping.get(subcategory)
-        if blob_env_var:
-            blob_url = os.getenv(blob_env_var)
-            if blob_url:
-                logger.info(f"2025년 모드 (Blob): {category}/{subcategory} → {blob_url}")
-                return blob_url
-            else:
-                logger.warning(f"Blob 환경변수 없음: {blob_env_var}, 로컬 파일로 fallback")
-
-        # 2. 로컬 파일 fallback
-        local_parquet_path = local_file_mapping.get(subcategory, "./parquet/1_safetykorea_flattened.parquet")
-
-        # Vercel 환경에서 절대경로도 시도
-        if not os.path.exists(local_parquet_path):
-            # 작업 디렉토리 기준 절대경로 시도
-            abs_parquet_path = os.path.abspath(local_parquet_path)
-            if os.path.exists(abs_parquet_path):
-                logger.info(f"2025년 모드 (절대경로): {category}/{subcategory} → {abs_parquet_path}")
-                return abs_parquet_path
-
-            # Project/ 하위 경로 시도
-            project_parquet_path = f"Project/{local_parquet_path}"
-            if os.path.exists(project_parquet_path):
-                logger.info(f"2025년 모드 (Project/): {category}/{subcategory} → {project_parquet_path}")
-                return project_parquet_path
-
-        if os.path.exists(local_parquet_path):
-            logger.info(f"2025년 모드: {category}/{subcategory} → {local_parquet_path}")
-            return local_parquet_path
+    # 🟢 R2 URL 사용 (field_settings.json 설정 기준)
+    r2_env_var = r2_env_mapping.get(subcategory)
+    if r2_env_var:
+        r2_url = os.getenv(r2_env_var)
+        if r2_url:
+            logger.info(f"R2 URL: {category}/{subcategory} → {r2_url}")
+            return r2_url
         else:
-            # 2025년 모드에서 파일을 찾을 수 없으면 R2로 fallback
-            logger.warning(f"2025년 모드: 파일 없음 {local_parquet_path}, R2 모드로 fallback")
-            # R2 모드로 처리하도록 data_mode 변경하지 않고 아래 R2 로직으로 진행
+            logger.warning(f"R2 환경변수 없음: {r2_env_var}")
+            return None
 
-    # 🔵 전체 데이터 모드: R2 URL 사용 (기본값, 프로덕션)
-    r2_url_mapping = {
-        # DataA 구조 매핑 - 새로운 환경변수 이름 사용
-        ("dataA", "safetykorea"): os.getenv("R2_URL_DATAA_1_SAFETYKOREA"),
-        ("dataA", "kwtc"): os.getenv("R2_URL_DATAA_8_KWTC"),
-        ("dataA", "rra-cert"): os.getenv("R2_URL_DATAA_11_RRA_CERT"),     # RRA 인증
-        ("dataA", "rra-self-cert"): os.getenv("R2_URL_DATAA_12_RRA_SELF_CERT"),  # RRA 자기적합성
-        ("dataA", "efficiency-rating"): os.getenv("R2_URL_DATAA_3_EFFICIENCY"), # 효율등급
-        ("dataA", "high-efficiency"): os.getenv("R2_URL_DATAA_4_HIGH_EFFICIENCY"),        # 고효율기기
-        ("dataA", "standby-power"): os.getenv("R2_URL_DATAA_5_STANDBY_POWER"),      # 대기전력
-        ("dataA", "approval"): os.getenv("R2_URL_DATAA_6_APPROVAL"),           # 승인정보
-        ("dataA", "declaration-details"): os.getenv("R2_URL_DATAA_7_DECLARE"),     # 신고정보
-        ("dataA", "recall"): os.getenv("R2_URL_DATAA_9_RECALL"),               # 리콜정보(국내)
-        ("dataA", "safetykoreachild"): os.getenv("R2_URL_DATAA_10_SAFETYKOREACHILD"),  # 어린이용품 인증정보
-        ("dataA", "safetykoreahome"): os.getenv("R2_URL_DATAA_13_SAFETYKOREAHOME"),  # 생활용품
-
-        # DataB 구조 매핑 - DataA와 동일한 파일 사용
-        ("dataB", "wadiz-makers"): os.getenv("R2_URL_DATAB_2_WADIZ"),              # 와디즈 메이커
-
-        # DataC Success 구조 매핑
-        ("dataC", "success", "safetykorea"): os.getenv("R2_URL_DATAC_SUCCESS_1_SAFETYKOREA"),
-        ("dataC", "success", "wadiz-makers"): os.getenv("R2_URL_DATAC_SUCCESS_2_WADIZ"),
-        ("dataC", "success", "efficiency-rating"): os.getenv("R2_URL_DATAC_SUCCESS_3_EFFICIENCY"),
-        ("dataC", "success", "high-efficiency"): os.getenv("R2_URL_DATAC_SUCCESS_4_HIGH_EFFICIENCY"),
-        ("dataC", "success", "standby-power"): os.getenv("R2_URL_DATAC_SUCCESS_5_STANDBY_POWER"),
-        ("dataC", "success", "approval"): os.getenv("R2_URL_DATAC_SUCCESS_6_APPROVAL"),
-        ("dataC", "success", "declaration-details"): os.getenv("R2_URL_DATAC_SUCCESS_7_DECLARE"),
-        ("dataC", "success", "kwtc"): os.getenv("R2_URL_DATAC_SUCCESS_8_KWTC"),
-        ("dataC", "success", "recall"): os.getenv("R2_URL_DATAC_SUCCESS_9_RECALL"),
-        ("dataC", "success", "safetykoreachild"): os.getenv("R2_URL_DATAC_SUCCESS_10_SAFETYKOREACHILD"),
-        ("dataC", "success", "safetykoreahome"): os.getenv("R2_URL_DATAC_SUCCESS_13_SAFETYKOREAHOME"),
-        ("dataC", "success", "rra-cert"): os.getenv("R2_URL_DATAC_SUCCESS_11_RRA_CERT"),
-        ("dataC", "success", "rra-self-cert"): os.getenv("R2_URL_DATAC_SUCCESS_12_RRA_SELF_CERT"),
-
-        # DataC Failed 구조 매핑
-        ("dataC", "failed", "safetykorea"): os.getenv("R2_URL_DATAC_FAILED_1_SAFETYKOREA"),
-        ("dataC", "failed", "wadiz-makers"): os.getenv("R2_URL_DATAC_FAILED_2_WADIZ"),
-        ("dataC", "failed", "efficiency-rating"): os.getenv("R2_URL_DATAC_FAILED_3_EFFICIENCY"),
-        ("dataC", "failed", "high-efficiency"): os.getenv("R2_URL_DATAC_FAILED_4_HIGH_EFFICIENCY"),
-        ("dataC", "failed", "standby-power"): os.getenv("R2_URL_DATAC_FAILED_5_STANDBY_POWER"),
-        ("dataC", "failed", "approval"): os.getenv("R2_URL_DATAC_FAILED_6_APPROVAL"),
-        ("dataC", "failed", "declaration-details"): os.getenv("R2_URL_DATAC_FAILED_7_DECLARE"),
-        ("dataC", "failed", "kwtc"): os.getenv("R2_URL_DATAC_FAILED_8_KWTC"),
-        ("dataC", "failed", "recall"): os.getenv("R2_URL_DATAC_FAILED_9_RECALL"),
-        ("dataC", "failed", "safetykoreachild"): os.getenv("R2_URL_DATAC_FAILED_10_SAFETYKOREACHILD"),
-        ("dataC", "failed", "safetykoreahome"): os.getenv("R2_URL_DATAC_FAILED_13_SAFETYKOREAHOME"),
-        ("dataC", "failed", "rra-cert"): os.getenv("R2_URL_DATAC_FAILED_11_RRA_CERT"),
-        ("dataC", "failed", "rra-self-cert"): os.getenv("R2_URL_DATAC_FAILED_12_RRA_SELF_CERT"),
-    }
-
-    r2_url = r2_url_mapping.get((category, subcategory))
-
-    # 로컬 개발 환경 fallback (VERCEL 환경변수 없을 때)
-    if not r2_url and os.getenv("VERCEL") is None:
-        local_parquet_path = local_file_mapping.get(subcategory, "./parquet/1_safetykorea_flattened.parquet")
-        if os.path.exists(local_parquet_path):
-            logger.info(f"로컬 개발 환경: {category}/{subcategory} → {local_parquet_path}")
-            return local_parquet_path
-        else:
-            logger.info(f"로컬 개발 환경: 기본 파일 사용")
-            return "./parquet/1_safetykorea_flattened.parquet"
-
-    if not r2_url:
-        fallback_candidates = []
-        local_candidate = local_file_mapping.get(subcategory)
-        if local_candidate:
-            fallback_candidates.extend([
-                local_candidate,
-                os.path.abspath(local_candidate),
-                f"Project/{local_candidate}"
-            ])
-
-        for candidate in fallback_candidates:
-            if candidate and os.path.exists(candidate):
-                logger.warning(
-                    f"R2 URL 누락: {category}/{subcategory} - 로컬 파일로 대체 ({candidate})"
-                )
-                return candidate
-
-        raise ValueError(f"R2 URL not found for {category}/{subcategory}. Check environment variables.")
-
-    logger.info(f"전체 데이터 모드: {category}/{subcategory} → R2")
-    return r2_url
+    # 설정된 카테고리가 아닌 경우 에러 반환
+    logger.error(f"지원하지 않는 카테고리: {category}/{subcategory}")
+    return None
 
 def search_in_fields(item: Dict[str, Any], keyword: str, search_field: str = "product_name") -> bool:
     """3개 검색 필드 지원 - '전체' 검색 기능 완전 제거"""

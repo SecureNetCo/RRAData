@@ -48,23 +48,16 @@ DUCKDB_CACHE_ROOT.mkdir(parents=True, exist_ok=True)
 def _get_search_pattern_and_operator(keyword: str, field: str) -> tuple[str, str]:
     """
     필드별 검색 패턴과 연산자 생성 함수
-    나중에 인증번호(cert_no) 필드에 대해 정확 매칭을 활성화할 수 있음
+    인증번호/신고번호 필드에 대해 정확 매칭 적용
 
     Returns:
         tuple: (search_pattern, operator)
         - operator: 'LIKE' 또는 '='
         - search_pattern: 검색 패턴 (LIKE용 '%keyword%' 또는 정확매칭용 'keyword')
     """
-    # 현재는 모든 필드에 기본 LIKE 검색 적용
-    # 나중에 다음과 같이 활성화 가능:
-
-    # 옵션 1: 인증번호 필드는 정확 매칭
-    # if field == 'cert_no':
-    #     return keyword, '='  # 정확 매칭
-
-    # 옵션 2: 인증번호 필드는 앞부분 매칭
-    # if field == 'cert_no':
-    #     return f"{keyword}%", 'LIKE'  # 앞부분만 매칭
+    # 인증번호/신고번호 필드는 정확 매칭
+    if field in ['cert_no', 'declare_no']:
+        return keyword, '='  # 정확 매칭
 
     # 기본: 부분 매칭 (LIKE '%keyword%')
     return f"%{keyword}%", 'LIKE'
@@ -1075,34 +1068,33 @@ class DuckDBProcessor:
             # 필드별 대소문자 구분 설정 확인
             is_case_insensitive = self._is_field_case_insensitive(field)
 
+            # **검색 패턴과 연산자 결정 - 인증번호/신고번호는 정확 매칭**
+            search_pattern, operator = _get_search_pattern_and_operator(keyword, field)
+
             # **성능 최적화: 검색어 사전처리 - 필드별 대소문자 구분에 따라 미리 변환**
-            if is_case_insensitive:
+            if is_case_insensitive and operator == 'LIKE':
                 search_pattern = f"%{keyword.lower()}%"
-            else:
-                # 인증번호 필드 별도 검색 로직 (나중에 활성화 가능)
-                search_pattern = _get_search_pattern(keyword, field)
-                # search_pattern = f"%{keyword}%"  # 기본 LIKE 검색
 
             if using_parquet:
                 # Parquet: 안전한 CAST 적용
-                if is_case_insensitive:
+                if is_case_insensitive and operator == 'LIKE':
                     # **성능 최적화: 컬럼만 LOWER, 검색어는 이미 Python에서 변환됨**
-                    conditions.append(f"LOWER(CAST({table_alias}\"{field}\" AS VARCHAR)) LIKE ?")
-                    logger.info(f"필드 '{field}': 대소문자 구분 안함 (컬럼만 LOWER 적용)")
+                    conditions.append(f"LOWER(CAST({table_alias}\"{field}\" AS VARCHAR)) {operator} ?")
+                    logger.info(f"필드 '{field}': 대소문자 구분 안함 (컬럼만 LOWER 적용), 연산자: {operator}")
                 else:
-                    # 대소문자 구분함: LOWER 함수 사용 안함
-                    conditions.append(f"CAST({table_alias}\"{field}\" AS VARCHAR) LIKE ?")
-                    logger.info(f"필드 '{field}': 대소문자 구분함 (LOWER 미적용)")
+                    # 대소문자 구분함 또는 정확 매칭: LOWER 함수 사용 안함
+                    conditions.append(f"CAST({table_alias}\"{field}\" AS VARCHAR) {operator} ?")
+                    logger.info(f"필드 '{field}': 대소문자 구분함 또는 정확매칭, 연산자: {operator}")
             else:
                 # JSON: 복합 타입은 문자열로 변환하여 검색
-                if is_case_insensitive:
+                if is_case_insensitive and operator == 'LIKE':
                     # **성능 최적화: 컬럼만 LOWER, 검색어는 이미 Python에서 변환됨**
-                    conditions.append(f"LOWER(CAST({table_alias}\"{field}\" AS VARCHAR)) LIKE ?")
-                    logger.info(f"필드 '{field}': 대소문자 구분 안함 (컬럼만 LOWER 적용)")
+                    conditions.append(f"LOWER(CAST({table_alias}\"{field}\" AS VARCHAR)) {operator} ?")
+                    logger.info(f"필드 '{field}': 대소문자 구분 안함 (컬럼만 LOWER 적용), 연산자: {operator}")
                 else:
-                    # 대소문자 구분함: LOWER 함수 사용 안함
-                    conditions.append(f"CAST({table_alias}\"{field}\" AS VARCHAR) LIKE ?")
-                    logger.info(f"필드 '{field}': 대소문자 구분함 (LOWER 미적용)")
+                    # 대소문자 구분함 또는 정확 매칭: LOWER 함수 사용 안함
+                    conditions.append(f"CAST({table_alias}\"{field}\" AS VARCHAR) {operator} ?")
+                    logger.info(f"필드 '{field}': 대소문자 구분함 또는 정확매칭, 연산자: {operator}")
             parameters.append(search_pattern)
         
         where_clause = " OR ".join(conditions) if conditions else "1=1"

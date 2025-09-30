@@ -64,21 +64,14 @@ class DynamicSearchEngine {
         
         // API 엔드포인트에 맞는 카테고리 매핑
         const categoryMapping = {
-            // dataA 카테고리
+            // dataA 카테고리 (실제 field_settings.json에 설정된 항목들만)
             'safetykorea': ['dataA', 'safetykorea'],
-            'kwtc': ['dataA', 'kwtc'],
-            'rra-self-conformity': ['dataA', 'rra-self-conformity'],
-            'rra-certification': ['dataA', 'rra-certification'],
-            'efficiency-rating': ['dataA', 'efficiency-rating'],
-            'high-efficiency': ['dataA', 'high-efficiency'],
-            'standby-power': ['dataA', 'standby-power'],
-            'approval-details': ['dataA', 'approval-details'],
-            'declaration-details': ['dataA', 'declaration-details'],
-            'recall': ['dataA', 'recall'],
             'safetykoreachild': ['dataA', 'safetykoreachild'],
-            
-            // dataB 카테고리
-            'wadiz-makers': ['dataB', 'wadiz-makers']
+            'safetykoreahome': ['dataA', 'safetykoreahome'],
+            'approval': ['dataA', 'approval'],
+            'declare': ['dataA', 'declare'],
+            'rra-cert': ['dataA', 'rra-cert'],
+            'rra-self-cert': ['dataA', 'rra-self-cert']
         };
         
         // URL 패턴 처리
@@ -367,10 +360,7 @@ class DynamicSearchEngine {
             return;
         }
 
-        if (keyword.length < 2) {
-            this.showMessage('검색어는 2글자 이상 입력해주세요.', 'warning');
-            return;
-        }
+        // 인증번호/신고번호 정확 매칭을 위한 최소 길이 검증 제거
 
         // 인증번호 필드 별도 검증 (나중에 활성화 가능)
         // const certNoValidation = this.validateCertNoSearch(keyword, searchField);
