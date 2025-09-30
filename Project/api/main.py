@@ -373,23 +373,6 @@ class SearchResponse(BaseModel):
     summary: Dict[str, Any]                 # 처리 정보
     available_categories: List[str]         # 사용 가능한 카테고리 (호환성용)
 
-# 다운로드 요청 모델
-class DownloadRequest(BaseModel):
-    search_conditions: Dict[str, Any]
-    file_format: str = "xlsx"  # 엑셀만 지원
-    user_session: Optional[str] = None
-    filtered_data: Optional[List[Dict[str, Any]]] = None  # 프론트엔드에서 필터링된 데이터
-
-# 검색 기반 전체 다운로드 요청 모델
-class SearchDownloadRequest(BaseModel):
-    keyword: str
-    search_field: Optional[str] = "all"
-    date_from: Optional[str] = None
-    date_to: Optional[str] = None
-    categories: Optional[List[str]] = None
-    filters: Optional[Dict[str, Any]] = None
-    file_format: str = "xlsx"
-    user_session: Optional[str] = None
 
 @app.get("/")
 async def root():
@@ -439,27 +422,6 @@ async def serve_search_page_data_a(category: str = "dataA", subcategory: str = N
     else:
         raise HTTPException(status_code=404, detail="검색 페이지를 찾을 수 없습니다")
 
-@app.get("/search/dataB/{subcategory}")
-async def serve_search_page_data_b(category: str = "dataB", subcategory: str = None):
-    """검색 페이지 - dataB 구조"""
-    search_path = static_path / "search.html"
-    if search_path.exists():
-        with open(search_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        return HTMLResponse(content=content)
-    else:
-        raise HTTPException(status_code=404, detail="검색 페이지를 찾을 수 없습니다")
-
-@app.get("/search/dataC/{result_type}/{subcategory}")
-async def serve_search_page_data_c(result_type: str, subcategory: str):
-    """검색 페이지 - dataC 구조 (success/failed)"""
-    search_path = static_path / "search.html"
-    if search_path.exists():
-        with open(search_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        return HTMLResponse(content=content)
-    else:
-        raise HTTPException(status_code=404, detail="검색 페이지를 찾을 수 없습니다")
 
 @app.get("/admin")
 async def serve_admin_page():
@@ -534,19 +496,11 @@ async def prefetch_single_file(request: SinglePrefetchRequest):
         # BLOB 환경변수가 없으면 R2 URL로 fallback 시도
         fallback_url = None
         try:
-            if request.category == "dataC" and request.result_type:
-                fallback_candidate = get_data_file_path_c(
-                    request.category,
-                    request.result_type,
-                    request.subcategory,
-                    prefer_r2=True
-                )
-            else:
-                fallback_candidate = get_data_file_path(
-                    request.category,
-                    request.subcategory,
-                    prefer_r2=True
-                )
+            fallback_candidate = get_data_file_path(
+                request.category,
+                request.subcategory,
+                prefer_r2=True
+            )
 
             if isinstance(fallback_candidate, str) and fallback_candidate.startswith("http"):
                 fallback_url = fallback_candidate
@@ -608,6 +562,10 @@ async def search_category_data(category: str, subcategory: str, request: SearchR
     카테고리별 검색 - DuckDB + Parquet 전용
     """
     try:
+        # 빈 검색어 검증
+        if not request.keyword or len(request.keyword.strip()) < 2:
+            raise HTTPException(status_code=400, detail="검색어는 2글자 이상 입력해주세요")
+
         # Parquet 데이터 파일 URL 가져오기
         data_file_path = get_data_file_path(category, subcategory)
         if not data_file_path:
@@ -687,97 +645,6 @@ async def search_data_a(subcategory: str, request: SearchRequest):
     """
     return await search_category_data("dataA", subcategory, request)
 
-@app.post("/api/search/dataB/{subcategory}")
-async def search_data_b(subcategory: str, request: SearchRequest):
-    """
-    dataB 카테고리 검색 - 새 구조
-    """
-    return await search_category_data("dataB", subcategory, request)
-
-@app.post("/api/search/dataC/{result_type}/{subcategory}")
-async def search_data_c(result_type: str, subcategory: str, request: SearchRequest):
-    """
-    dataC 카테고리 검색 - 새 구조 (success/failed)
-    """
-    return await search_category_data_c("dataC", result_type, subcategory, request)
-
-async def search_category_data_c(category: str, result_type: str, subcategory: str, request: SearchRequest):
-    """
-    dataC 카테고리별 검색 - DuckDB + Parquet 전용 (3-parameter structure)
-    """
-    try:
-        # Parquet 데이터 파일 URL 가져오기 (3-parameter structure)
-        data_file_path = get_data_file_path_c(category, result_type, subcategory)
-        if not data_file_path:
-            raise HTTPException(status_code=404, detail=f"데이터 파일 URL을 찾을 수 없습니다: {category}/{result_type}/{subcategory}")
-        
-        # R2 URL인지 확인하여 적절한 처리 방식 선택
-        is_r2_url = data_file_path.startswith('https://') 
-        if is_r2_url:
-            # R2 URL이면 항상 대용량 파일 처리 (DuckDB) 사용
-            file_size_mb = 100.0  # 대용량 처리 로직을 타도록 설정
-        else:
-            # 로컬 파일이면 실제 크기 확인
-            from pathlib import Path
-            local_path = Path(data_file_path)
-            file_size_mb = local_path.stat().st_size / (1024 * 1024) if local_path.exists() else 0
-        
-        logger.info(f"DuckDB Parquet 처리 시작: {category}/{result_type}/{subcategory} ({'R2 URL' if is_r2_url else f'{file_size_mb:.1f}MB'})")
-
-        # DuckDB로 Parquet 파일 검색 (페이지네이션)
-        effective_subcategory = normalize_subcategory(subcategory)
-
-        search_result = await duckdb_search_large_file(
-            file_path=str(data_file_path),
-            keyword=request.keyword,
-            search_field=request.search_field,
-            limit=request.limit,
-            page=request.page,
-            filters=request.filters,
-            category=category,
-            subcategory=effective_subcategory,
-            result_type=result_type
-        )
-        
-        # 오류 발생 시 예외 처리
-        if "error" in search_result:
-            raise HTTPException(status_code=500, detail=f"검색 처리 실패: {search_result.get('message')}")
-        
-        # 요약 정보 생성
-        summary = {
-            "processing_method": "duckdb_pagination",
-            "file_size_mb": round(file_size_mb, 2),
-            "processing_stats": search_result.get("stats", {}),
-            "duckdb_enabled": True,
-            "performance_note": "서버사이드 페이지네이션으로 최적화된 처리"
-        }
-
-        # 디버그 정보 추가 (search_result에서 가져옴)
-        if "debug_info" in search_result and search_result["debug_info"]:
-            summary["debug_info"] = search_result["debug_info"]
-
-        # 페이지네이션 정보 생성
-        pagination_data = search_result.get("pagination", {})
-        pagination_info = PaginationInfo(
-            total_count=pagination_data.get("total_count", 0),
-            total_pages=pagination_data.get("total_pages", 1),
-            current_page=pagination_data.get("current_page", 1),
-            items_per_page=pagination_data.get("items_per_page", 20),
-            has_next=pagination_data.get("has_next", False),
-            has_prev=pagination_data.get("has_prev", False)
-        )
-
-        return SearchResponse(
-            results=search_result.get("results", []),
-            pagination=pagination_info,
-            summary=summary,
-            available_categories=[]
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"검색 중 오류 발생: {str(e)}")
 
 @app.post("/api/search")
 async def search_data(request: SearchRequest):
@@ -823,89 +690,6 @@ async def get_categories():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"카테고리 로드 중 오류 발생: {str(e)}")
 
-@app.post("/api/download")
-async def request_download(request: DownloadRequest):
-    """프론트에서 전달한 데이터를 즉시 Excel로 반환"""
-    try:
-        if request.filtered_data:
-            filtered_data = request.filtered_data
-        else:
-            filtered_data = await filter_data_by_conditions(request.search_conditions)
-
-        if not filtered_data:
-            raise HTTPException(status_code=400, detail="다운로드할 데이터가 없습니다")
-
-        filename = f"datapage_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-        return _stream_excel_from_records(filtered_data, filename=filename)
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"다운로드 요청 처리 실패: {str(e)}")
-
-@app.post("/api/download-search/{category}/{subcategory}")
-async def request_search_download(
-    category: str,
-    subcategory: str,
-    request: SearchDownloadRequest,
-):
-    """검색 조건 기반 Excel 파일을 즉시 스트리밍"""
-    try:
-        return await _stream_excel_from_query(
-            category=category,
-            subcategory=subcategory,
-            result_type=None,
-            keyword=request.keyword,
-            search_field=request.search_field,
-            filters=request.filters,
-            date_from=request.date_from,
-            date_to=request.date_to,
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"검색 다운로드 처리 실패: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"다운로드 요청 처리 실패: {str(e)}")
-
-@app.post("/api/download-search/dataA/{subcategory}")
-async def request_search_download_data_a(
-    subcategory: str,
-    request: SearchDownloadRequest,
-):
-    return await request_search_download("dataA", subcategory, request)
-
-
-@app.post("/api/download-search/dataB/{subcategory}")
-async def request_search_download_data_b(
-    subcategory: str,
-    request: SearchDownloadRequest,
-):
-    return await request_search_download("dataB", subcategory, request)
-
-
-@app.post("/api/download-search/dataC/{result_type}/{subcategory}")
-async def request_search_download_data_c(
-    result_type: str,
-    subcategory: str,
-    request: SearchDownloadRequest,
-):
-    """DataC 카테고리 Excel 다운로드 (success/failed)"""
-    try:
-        return await _stream_excel_from_query(
-            category="dataC",
-            subcategory=subcategory,
-            result_type=result_type,
-            keyword=request.keyword,
-            search_field=request.search_field,
-            filters=request.filters,
-            date_from=request.date_from,
-            date_to=request.date_to,
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"DataC 다운로드 처리 실패: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"다운로드 요청 처리 실패: {str(e)}")
 
 
 @app.get("/api/file-info/{category}/{subcategory}")
@@ -1441,42 +1225,6 @@ def get_korean_field_mapping(category: str, subcategory: str) -> Dict[str, str]:
     
     return {}  # 실패 시 빈 딕셔너리 반환
 
-def get_download_fields(category: str, subcategory: str, result_type: Optional[str] = None) -> List[str]:
-    """카테고리/서브카테고리에 따른 download_fields 목록 반환"""
-    try:
-        normalized_subcategory = normalize_subcategory(subcategory)
-        config_path = Path(__file__).parent.parent / "config" / "field_settings.json"
-        with open(config_path, 'r', encoding='utf-8') as f:
-            field_settings = json.load(f)
-
-        category_config = field_settings.get(category, {})
-
-        if category == "dataC":
-            bucket_key = result_type or "success"
-            category_config = category_config.get(bucket_key, {})
-
-        if normalized_subcategory in category_config:
-            download_fields = category_config[normalized_subcategory].get("download_fields", [])
-            return download_fields
-    except Exception as e:
-        logger.error(f"download_fields 로드 실패: {str(e)}")
-
-    return []  # 실패 시 빈 리스트 반환
-
-def filter_data_by_download_fields(data: List[Dict], download_fields: List[str]) -> List[Dict]:
-    """데이터를 download_fields에 지정된 필드만 포함하도록 필터링"""
-    if not download_fields or not data:
-        return data
-
-    filtered_data = []
-    for item in data:
-        filtered_item = {}
-        for field in download_fields:
-            if field in item:
-                filtered_item[field] = item[field]
-        filtered_data.append(filtered_item)
-
-    return filtered_data
 
 
 def _normalize_excel_value(value: Any) -> Any:
@@ -1493,327 +1241,7 @@ def _normalize_excel_value(value: Any) -> Any:
     return value
 
 
-async def _stream_excel_from_query(
-    *,
-    category: str,
-    subcategory: str,
-    result_type: Optional[str],
-    keyword: Optional[str],
-    search_field: Optional[str],
-    filters: Optional[Dict[str, Any]],
-    date_from: Optional[str],
-    date_to: Optional[str],
-) -> StreamingResponse:
-    """DuckDB 조회 결과를 즉시 Excel로 스트리밍"""
 
-    # 데이터 파일 경로 확인
-    if category == "dataC" and result_type:
-        data_file_path = get_data_file_path_c(category, result_type, subcategory)
-    else:
-        data_file_path = get_data_file_path(category, subcategory)
-
-    effective_subcategory = normalize_subcategory(subcategory)
-
-    korean_field_mapping = get_korean_field_mapping(category, subcategory)
-    download_fields = get_download_fields(category, subcategory, result_type)
-
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
-        temp_path = Path(tmp.name)
-
-    total_records = 0
-    header_written = False
-    selected_columns: List[str] = []
-
-    workbook = Workbook(write_only=True)
-    worksheet = workbook.create_sheet(title="검색 결과")
-
-    def handle_chunk(chunk: List[Dict[str, Any]], total_processed: int):
-        nonlocal header_written, selected_columns, total_records
-        if not chunk:
-            return
-
-        if not header_written:
-            if download_fields:
-                selected_columns = download_fields
-            else:
-                selected_columns = list(chunk[0].keys())
-
-            header_labels = [korean_field_mapping.get(col, col) for col in selected_columns]
-            worksheet.append(header_labels)
-            header_written = True
-
-        for record in chunk:
-            row = [_normalize_excel_value(record.get(col)) for col in selected_columns]
-            worksheet.append(row)
-
-        total_records = total_processed
-
-    query_result = await duckdb_search_large_file(
-        file_path=str(data_file_path),
-        keyword=keyword,
-        search_field=search_field,
-        limit=None,
-        page=1,
-        filters=filters,
-        category=category,
-        subcategory=effective_subcategory,
-        result_type=result_type,
-        collect_results=False,
-        chunk_callback=handle_chunk,
-        chunk_size=1000,
-        required_fields=download_fields
-    )
-
-    if query_result.get("error"):
-        raise HTTPException(status_code=500, detail=f"검색 실패: {query_result.get('message')}")
-
-    if not header_written:
-        try:
-            temp_path.unlink(missing_ok=True)
-        except Exception:
-            pass
-        raise HTTPException(status_code=404, detail="검색 결과가 없습니다.")
-
-    workbook.save(temp_path)
-    workbook.close()
-
-    filename = f"datapage_{effective_subcategory}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-
-    def file_iterator():
-        try:
-            with temp_path.open('rb') as f:
-                for chunk in iter(lambda: f.read(64 * 1024), b''):
-                    yield chunk
-        finally:
-            try:
-                temp_path.unlink(missing_ok=True)
-            except Exception:
-                pass
-
-    response = StreamingResponse(
-        file_iterator(),
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-    response.headers["Content-Disposition"] = f"attachment; filename*=UTF-8''{quote(filename)}"
-    response.headers["X-Total-Count"] = str(query_result.get("pagination", {}).get("total_count", total_records))
-    return response
-
-
-def _stream_excel_from_records(records: List[Dict[str, Any]], *, filename: Optional[str] = None) -> StreamingResponse:
-    """프론트에서 전달된 소량 데이터를 즉시 Excel로 반환"""
-    if not records:
-        raise HTTPException(status_code=400, detail="다운로드할 데이터가 없습니다")
-
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
-        temp_path = Path(tmp.name)
-
-    workbook = Workbook(write_only=True)
-    worksheet = workbook.create_sheet(title="검색 결과")
-
-    headers = list(records[0].keys())
-    worksheet.append(headers)
-
-    for record in records:
-        row = [_normalize_excel_value(record.get(col)) for col in headers]
-        worksheet.append(row)
-
-    workbook.save(temp_path)
-    workbook.close()
-
-    if not filename:
-        filename = f"datapage_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-
-    def file_iterator():
-        try:
-            with temp_path.open('rb') as f:
-                for chunk in iter(lambda: f.read(64 * 1024), b''):
-                    yield chunk
-        finally:
-            try:
-                temp_path.unlink(missing_ok=True)
-            except Exception:
-                pass
-
-    response = StreamingResponse(
-        file_iterator(),
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-    response.headers["Content-Disposition"] = f"attachment; filename*=UTF-8''{quote(filename)}"
-    response.headers["X-Total-Count"] = str(len(records))
-    return response
-
-def get_data_file_path_c(category: str, result_type: str, subcategory: str, prefer_r2: bool = False) -> str:
-    """DataC 카테고리용 3-parameter 데이터 파일 경로 생성 (DATA_MODE 환경변수 기반 듀얼 모드)"""
-
-    normalized_subcategory = normalize_subcategory(subcategory)
-    if normalized_subcategory != subcategory:
-        logger.info(
-            f"서브카테고리 정규화: {category}/{result_type}/{subcategory} → {normalized_subcategory}"
-        )
-        subcategory = normalized_subcategory
-
-    # 🎯 DATA_MODE 환경변수로 모드 결정
-    data_mode = os.getenv("DATA_MODE", "full").lower()
-
-    # Vercel Blob URL 매핑 (DataC 2025년 필터링된 데이터) - 환경변수 사용
-    blob_env_mapping_c = {
-        # DataC Success 매핑
-        ("success", "safetykorea"): "BLOB_URL_DATAC_SUCCESS_1_SAFETYKOREA",
-        ("success", "wadiz-makers"): "BLOB_URL_DATAC_SUCCESS_2_WADIZ",
-        ("success", "efficiency-rating"): "BLOB_URL_DATAC_SUCCESS_3_EFFICIENCY",
-        ("success", "high-efficiency"): "BLOB_URL_DATAC_SUCCESS_4_HIGH_EFFICIENCY",
-        ("success", "standby-power"): "BLOB_URL_DATAC_SUCCESS_5_STANDBY_POWER",
-        ("success", "approval"): "BLOB_URL_DATAC_SUCCESS_6_APPROVAL",
-        ("success", "declaration-details"): "BLOB_URL_DATAC_SUCCESS_7_DECLARE",
-        ("success", "kwtc"): "BLOB_URL_DATAC_SUCCESS_8_KWTC",
-        ("success", "recall"): "BLOB_URL_DATAC_SUCCESS_9_RECALL",
-        ("success", "safetykoreachild"): "BLOB_URL_DATAC_SUCCESS_10_SAFETYKOREACHILD",
-        ("success", "rra-cert"): "BLOB_URL_DATAC_SUCCESS_11_RRA_CERT",
-        ("success", "rra-self-cert"): "BLOB_URL_DATAC_SUCCESS_12_RRA_SELF_CERT",
-        ("success", "safetykoreahome"): "BLOB_URL_DATAC_SUCCESS_13_SAFETYKOREAHOME",
-
-        # DataC Failed 매핑
-        ("failed", "safetykorea"): "BLOB_URL_DATAC_FAILED_1_SAFETYKOREA",
-        ("failed", "wadiz-makers"): "BLOB_URL_DATAC_FAILED_2_WADIZ",
-        ("failed", "efficiency-rating"): "BLOB_URL_DATAC_FAILED_3_EFFICIENCY",
-        ("failed", "high-efficiency"): "BLOB_URL_DATAC_FAILED_4_HIGH_EFFICIENCY",
-        ("failed", "standby-power"): "BLOB_URL_DATAC_FAILED_5_STANDBY_POWER",
-        ("failed", "approval"): "BLOB_URL_DATAC_FAILED_6_APPROVAL",
-        ("failed", "declaration-details"): "BLOB_URL_DATAC_FAILED_7_DECLARE",
-        ("failed", "kwtc"): "BLOB_URL_DATAC_FAILED_8_KWTC",
-        ("failed", "recall"): "BLOB_URL_DATAC_FAILED_9_RECALL",
-        ("failed", "safetykoreachild"): "BLOB_URL_DATAC_FAILED_10_SAFETYKOREACHILD",
-        ("failed", "rra-cert"): "BLOB_URL_DATAC_FAILED_11_RRA_CERT",
-        ("failed", "rra-self-cert"): "BLOB_URL_DATAC_FAILED_12_RRA_SELF_CERT",
-        ("failed", "safetykoreahome"): "BLOB_URL_DATAC_FAILED_13_SAFETYKOREAHOME"
-    }
-
-    # 로컬 parquet 파일 경로 매핑 (2025년 필터링된 데이터)
-    local_file_mapping = {
-        "safetykorea": "./parquet/1_safetykorea_flattened.parquet",
-        "kwtc": "./parquet/8_kwtc_flattened.parquet",
-        "rra-cert": "./parquet/11_rra_cert_flattened.parquet",
-        "rra-self-cert": "./parquet/12_rra_self_cert_flattened.parquet",
-        "efficiency-rating": "./parquet/3_efficiency_flattened.parquet",
-        "high-efficiency": "./parquet/4_high_efficiency_flattened.parquet",
-        "standby-power": "./parquet/5_standby_power_flattened.parquet",
-        "approval": "./parquet/6_approval_flattened.parquet",
-        "declaration-details": "./parquet/7_declare_flattened.parquet",
-        "recall": "./parquet/9_recall_flattened.parquet",
-        "safetykoreachild": "./parquet/10_safetykoreachild_flattened.parquet",
-        "safetykoreahome": "./parquet/13_safetykoreahome_flattened.parquet",
-        "wadiz-makers": "./parquet/2_wadiz_flattened.parquet",
-    }
-
-    # 🟢 2025년 모드: Vercel Blob URL 우선 사용 (성능 최적화)
-    if not prefer_r2 and data_mode == "2025":
-        # 1. Vercel Blob URL 사용 (환경변수에서)
-        blob_env_var = blob_env_mapping_c.get((result_type, subcategory))
-        if blob_env_var:
-            blob_url = os.getenv(blob_env_var)
-            if blob_url:
-                logger.info(f"2025년 모드 (Blob): {category}/{result_type}/{subcategory} → {blob_url}")
-                return blob_url
-            else:
-                logger.warning(f"Blob 환경변수 없음: {blob_env_var}, prefetch로 fallback")
-
-        # 2. Prefetch 시스템 fallback
-        prefetched_path = get_prefetched_blob_path(category, subcategory, result_type)
-        if prefetched_path:
-            logger.info(f"2025년 모드 (Blob-prefetch): {category}/{result_type}/{subcategory} → {prefetched_path}")
-            return prefetched_path
-
-        local_parquet_path = local_file_mapping.get(subcategory, "./parquet/1_safetykorea_flattened.parquet")
-
-        # Vercel 환경에서 절대경로도 시도
-        if not os.path.exists(local_parquet_path):
-            # 작업 디렉토리 기준 절대경로 시도
-            abs_parquet_path = os.path.abspath(local_parquet_path)
-            if os.path.exists(abs_parquet_path):
-                logger.info(f"2025년 모드 (DataC-절대경로): {category}/{result_type}/{subcategory} → {abs_parquet_path}")
-                return abs_parquet_path
-
-            # Project/ 하위 경로 시도
-            project_parquet_path = f"Project/{local_parquet_path}"
-            if os.path.exists(project_parquet_path):
-                logger.info(f"2025년 모드 (DataC-Project/): {category}/{result_type}/{subcategory} → {project_parquet_path}")
-                return project_parquet_path
-
-        if os.path.exists(local_parquet_path):
-            logger.info(f"2025년 모드 (DataC): {category}/{result_type}/{subcategory} → {local_parquet_path}")
-            return local_parquet_path
-        else:
-            # 2025년 모드에서 파일을 찾을 수 없으면 R2로 fallback
-            logger.warning(f"2025년 모드 (DataC): 파일 없음 {local_parquet_path}, R2 모드로 fallback")
-            # R2 모드로 처리하도록 아래 R2 로직으로 진행
-
-    # 🔵 전체 데이터 모드: R2 URL 사용 (기본값, 프로덕션)
-    r2_url_mapping = {
-        # DataC Success 구조 매핑
-        ("dataC", "success", "safetykorea"): os.getenv("R2_URL_DATAC_SUCCESS_1_SAFETYKOREA"),
-        ("dataC", "success", "wadiz-makers"): os.getenv("R2_URL_DATAC_SUCCESS_2_WADIZ"),
-        ("dataC", "success", "efficiency-rating"): os.getenv("R2_URL_DATAC_SUCCESS_3_EFFICIENCY"),
-        ("dataC", "success", "high-efficiency"): os.getenv("R2_URL_DATAC_SUCCESS_4_HIGH_EFFICIENCY"),
-        ("dataC", "success", "standby-power"): os.getenv("R2_URL_DATAC_SUCCESS_5_STANDBY_POWER"),
-        ("dataC", "success", "approval"): os.getenv("R2_URL_DATAC_SUCCESS_6_APPROVAL"),
-        ("dataC", "success", "declaration-details"): os.getenv("R2_URL_DATAC_SUCCESS_7_DECLARE"),
-        ("dataC", "success", "kwtc"): os.getenv("R2_URL_DATAC_SUCCESS_8_KWTC"),
-        ("dataC", "success", "recall"): os.getenv("R2_URL_DATAC_SUCCESS_9_RECALL"),
-        ("dataC", "success", "safetykoreachild"): os.getenv("R2_URL_DATAC_SUCCESS_10_SAFETYKOREACHILD"),
-        ("dataC", "success", "safetykoreahome"): os.getenv("R2_URL_DATAC_SUCCESS_13_SAFETYKOREAHOME"),
-        ("dataC", "success", "rra-cert"): os.getenv("R2_URL_DATAC_SUCCESS_11_RRA_CERT"),
-        ("dataC", "success", "rra-self-cert"): os.getenv("R2_URL_DATAC_SUCCESS_12_RRA_SELF_CERT"),
-
-        # DataC Failed 구조 매핑
-        ("dataC", "failed", "safetykorea"): os.getenv("R2_URL_DATAC_FAILED_1_SAFETYKOREA"),
-        ("dataC", "failed", "wadiz-makers"): os.getenv("R2_URL_DATAC_FAILED_2_WADIZ"),
-        ("dataC", "failed", "efficiency-rating"): os.getenv("R2_URL_DATAC_FAILED_3_EFFICIENCY"),
-        ("dataC", "failed", "high-efficiency"): os.getenv("R2_URL_DATAC_FAILED_4_HIGH_EFFICIENCY"),
-        ("dataC", "failed", "standby-power"): os.getenv("R2_URL_DATAC_FAILED_5_STANDBY_POWER"),
-        ("dataC", "failed", "approval"): os.getenv("R2_URL_DATAC_FAILED_6_APPROVAL"),
-        ("dataC", "failed", "declaration-details"): os.getenv("R2_URL_DATAC_FAILED_7_DECLARE"),
-        ("dataC", "failed", "kwtc"): os.getenv("R2_URL_DATAC_FAILED_8_KWTC"),
-        ("dataC", "failed", "recall"): os.getenv("R2_URL_DATAC_FAILED_9_RECALL"),
-        ("dataC", "failed", "safetykoreachild"): os.getenv("R2_URL_DATAC_FAILED_10_SAFETYKOREACHILD"),
-        ("dataC", "failed", "safetykoreahome"): os.getenv("R2_URL_DATAC_FAILED_13_SAFETYKOREAHOME"),
-        ("dataC", "failed", "rra-cert"): os.getenv("R2_URL_DATAC_FAILED_11_RRA_CERT"),
-        ("dataC", "failed", "rra-self-cert"): os.getenv("R2_URL_DATAC_FAILED_12_RRA_SELF_CERT"),
-    }
-
-    r2_url = r2_url_mapping.get((category, result_type, subcategory))
-
-    # 로컬 개발 환경 fallback (VERCEL 환경변수 없을 때)
-    if not r2_url and os.getenv("VERCEL") is None:
-        local_parquet_path = local_file_mapping.get(subcategory, "./parquet/1_safetykorea_flattened.parquet")
-        if os.path.exists(local_parquet_path):
-            logger.info(f"로컬 개발 환경 (DataC): {category}/{result_type}/{subcategory} → {local_parquet_path}")
-            return local_parquet_path
-        else:
-            logger.info(f"로컬 개발 환경 (DataC): 기본 파일 사용")
-            return "./parquet/1_safetykorea_flattened.parquet"
-
-    if not r2_url:
-        # 환경변수가 없으면 로컬 파일 후보로 마지막 시도
-        fallback_candidates = []
-        local_candidate = local_file_mapping.get(subcategory)
-        if local_candidate:
-            fallback_candidates.extend([
-                local_candidate,
-                os.path.abspath(local_candidate),
-                f"Project/{local_candidate}"
-            ])
-
-        for candidate in fallback_candidates:
-            if candidate and os.path.exists(candidate):
-                logger.warning(
-                    f"R2 URL 누락: {category}/{result_type}/{subcategory} - 로컬 파일로 대체 ({candidate})"
-                )
-                return candidate
-
-        raise ValueError(f"R2 URL not found for {category}/{result_type}/{subcategory}. Check environment variables.")
-
-    logger.info(f"전체 데이터 모드 (DataC): {category}/{result_type}/{subcategory} → R2")
-    return r2_url
 
 def get_data_file_path(category: str, subcategory: str, prefer_r2: bool = False) -> str:
     """카테고리와 서브카테고리로 데이터 파일 경로 생성 (DATA_MODE 환경변수 기반 듀얼 모드)"""
@@ -2281,6 +1709,88 @@ def initialize_field_settings():
         logger.error(f"설정 시스템 초기화 실패: {e}")
 
 
+
+# R2 클라이언트 임포트 및 인스턴스 (Private 버킷용)
+try:
+    from utils.r2_client import R2Client
+    r2_private_client = None
+
+    def get_r2_private_client():
+        global r2_private_client
+        if r2_private_client is None:
+            r2_private_client = R2Client()
+        return r2_private_client
+
+except ImportError as e:
+    logger.warning(f"R2 클라이언트 임포트 실패: {e}")
+    r2_private_client = None
+
+@app.get("/api/secure-file-url/{category}/{subcategory}")
+async def get_secure_file_url(
+    category: str,
+    subcategory: str,
+    expires_in: int = Query(3600, ge=300, le=86400, description="URL 만료시간 (초, 5분~24시간)")
+):
+    """
+    Private R2 버킷 파일에 대한 Signed URL 생성
+
+    Args:
+        category: 데이터 카테고리 (dataA, dataB, dataC)
+        subcategory: 하위 카테고리 (rra-cert, rra-self-cert 등)
+        expires_in: URL 만료시간 (초, 기본 1시간)
+
+    Returns:
+        dict: signed_url과 expires_in 정보
+    """
+    try:
+        if r2_private_client is None:
+            raise HTTPException(
+                status_code=503,
+                detail="R2 Private 클라이언트가 설정되지 않았습니다"
+            )
+
+        # 기존 get_data_file_path 로직을 참조하여 파일 키 생성
+        # Private 버킷에서는 parquet 파일 경로 구성
+        r2_key = f"datapage-parquet/{subcategory}_flattened.parquet"
+
+        # RRA 데이터 특별 처리
+        if category == "dataA":
+            if subcategory == "rra-cert":
+                r2_key = "datapage-parquet/11_rra_cert_flattened.parquet"
+            elif subcategory == "rra-self-cert":
+                r2_key = "datapage-parquet/12_rra_self_cert_flattened.parquet"
+
+        client = get_r2_private_client()
+
+        # 파일 존재 확인
+        if not client.file_exists(r2_key):
+            raise HTTPException(
+                status_code=404,
+                detail=f"파일을 찾을 수 없습니다: {r2_key}"
+            )
+
+        # Signed URL 생성
+        signed_url = client.generate_presigned_url(r2_key, expires_in)
+
+        logger.info(f"Signed URL 생성 성공: {category}/{subcategory} -> {r2_key}")
+
+        return {
+            "signed_url": signed_url,
+            "expires_in": expires_in,
+            "expires_at": datetime.utcnow().isoformat() + "Z",
+            "file_key": r2_key,
+            "category": category,
+            "subcategory": subcategory
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Signed URL 생성 실패: {category}/{subcategory}, {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Signed URL 생성 중 오류가 발생했습니다: {str(e)}"
+        )
 
 # 애플리케이션 시작시 초기화
 initialize_field_settings()

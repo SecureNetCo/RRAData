@@ -179,3 +179,40 @@ class R2Client:
             return True
         except ClientError:
             return False
+
+    def generate_presigned_url(self, r2_key: str, expires_in: int = 3600) -> str:
+        """
+        Presigned URL 생성 (Private 버킷용)
+
+        Args:
+            r2_key (str): 파일 키 (예: "datapage-parquet/11_rra_cert_flattened.parquet")
+            expires_in (int): 만료시간 (초, 기본 1시간)
+
+        Returns:
+            str: Presigned URL
+        """
+        try:
+            logger.info(f"Presigned URL 생성 시작: {r2_key}")
+
+            presigned_url = self.s3_client.generate_presigned_url(
+                'get_object',
+                Params={
+                    'Bucket': self.bucket_name,
+                    'Key': r2_key
+                },
+                ExpiresIn=expires_in
+            )
+
+            logger.info(f"Presigned URL 생성 완료: {r2_key}")
+            return presigned_url
+
+        except ClientError as e:
+            logger.error(f"Presigned URL 생성 실패: {r2_key}, {e}")
+            raise
+
+    def get_private_bucket_name(self) -> str:
+        """Private 버킷명 반환"""
+        private_bucket = os.getenv('R2_PRIVATE_BUCKET_NAME')
+        if private_bucket:
+            return private_bucket
+        return self.bucket_name
