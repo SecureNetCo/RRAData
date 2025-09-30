@@ -22,15 +22,20 @@ class R2Client:
         - R2_ACCOUNT_ID: Cloudflare 계정 ID
         - R2_ACCESS_KEY_ID: R2 API 토큰의 Access Key ID
         - R2_SECRET_ACCESS_KEY: R2 API 토큰의 Secret Access Key
-        - R2_BUCKET_NAME: 사용할 R2 버킷 이름
+        - R2_PRIVATE_BUCKET_NAME: 사용할 Private R2 버킷 이름
         """
         self.account_id = os.getenv('R2_ACCOUNT_ID')
         self.access_key_id = os.getenv('R2_ACCESS_KEY_ID')
         self.secret_access_key = os.getenv('R2_SECRET_ACCESS_KEY')
-        self.bucket_name = os.getenv('R2_BUCKET_NAME', 'datapage-parquet')
+        self.bucket_name = os.getenv('R2_PRIVATE_BUCKET_NAME', 'datapage-parquet')
 
-        if not all([self.account_id, self.access_key_id, self.secret_access_key]):
-            raise ValueError("R2 환경변수가 설정되지 않았습니다: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY")
+        if not all([self.account_id, self.access_key_id, self.secret_access_key, self.bucket_name]):
+            missing = []
+            if not self.account_id: missing.append("R2_ACCOUNT_ID")
+            if not self.access_key_id: missing.append("R2_ACCESS_KEY_ID")
+            if not self.secret_access_key: missing.append("R2_SECRET_ACCESS_KEY")
+            if not self.bucket_name: missing.append("R2_PRIVATE_BUCKET_NAME")
+            raise ValueError(f"R2 환경변수가 설정되지 않았습니다: {', '.join(missing)}")
 
         # R2 엔드포인트 URL 구성
         self.endpoint_url = f'https://{self.account_id}.r2.cloudflarestorage.com'
