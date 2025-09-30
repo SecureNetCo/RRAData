@@ -47,6 +47,15 @@
           "searchable": true
         },
         {
+          "field": "manufacturer",
+          "name": "제조업체",
+          "width": "12%",
+          "type": "text",
+          "align": "left",
+          "sortable": true,
+          "searchable": true
+        },
+        {
           "field": "country",
           "name": "제조국가",
           "width": "8%",
@@ -149,6 +158,15 @@
           "field": "business_name",
           "name": "업체명",
           "width": "15%",
+          "type": "text",
+          "align": "left",
+          "sortable": true,
+          "searchable": true
+        },
+        {
+          "field": "manufacturer",
+          "name": "제조업체",
+          "width": "12%",
           "type": "text",
           "align": "left",
           "sortable": true,
