@@ -1753,16 +1753,15 @@ async def get_secure_file_url(
                 detail=f"R2 Private 클라이언트 초기화 실패: {str(e)}"
             )
 
-        # 기존 get_data_file_path 로직을 참조하여 파일 키 생성
-        # Private 버킷에서는 parquet 파일 경로 구성
-        r2_key = f"datapage-parquet/{subcategory}_flattened.parquet"
+        # Private 버킷에서는 루트에 직접 저장된 parquet 파일 접근
+        r2_key = f"{subcategory}_flattened.parquet"
 
         # RRA 데이터 특별 처리
         if category == "dataA":
             if subcategory == "rra-cert":
-                r2_key = "datapage-parquet/11_rra_cert_flattened.parquet"
+                r2_key = "11_rra_cert_flattened.parquet"
             elif subcategory == "rra-self-cert":
-                r2_key = "datapage-parquet/12_rra_self_cert_flattened.parquet"
+                r2_key = "12_rra_self_cert_flattened.parquet"
 
         # 파일 존재 확인
         if not client.file_exists(r2_key):
