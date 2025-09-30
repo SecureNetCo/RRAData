@@ -27,7 +27,7 @@ class R2Client:
         self.account_id = os.getenv('R2_ACCOUNT_ID')
         self.access_key_id = os.getenv('R2_ACCESS_KEY_ID')
         self.secret_access_key = os.getenv('R2_SECRET_ACCESS_KEY')
-        self.bucket_name = os.getenv('R2_PRIVATE_BUCKET_NAME', 'datapage-parquet')
+        self.bucket_name = os.getenv('R2_PRIVATE_BUCKET_NAME', 'rra-datas')
 
         if not all([self.account_id, self.access_key_id, self.secret_access_key, self.bucket_name]):
             missing = []
