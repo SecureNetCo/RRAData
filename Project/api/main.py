@@ -1743,10 +1743,14 @@ async def get_secure_file_url(
         dict: signed_url과 expires_in 정보
     """
     try:
-        if r2_private_client is None:
+        # R2 클라이언트 생성 시도
+        try:
+            client = get_r2_private_client()
+        except Exception as e:
+            logger.error(f"R2 클라이언트 생성 실패: {e}")
             raise HTTPException(
                 status_code=503,
-                detail="R2 Private 클라이언트가 설정되지 않았습니다"
+                detail=f"R2 Private 클라이언트 초기화 실패: {str(e)}"
             )
 
         # 기존 get_data_file_path 로직을 참조하여 파일 키 생성
@@ -1759,8 +1763,6 @@ async def get_secure_file_url(
                 r2_key = "datapage-parquet/11_rra_cert_flattened.parquet"
             elif subcategory == "rra-self-cert":
                 r2_key = "datapage-parquet/12_rra_self_cert_flattened.parquet"
-
-        client = get_r2_private_client()
 
         # 파일 존재 확인
         if not client.file_exists(r2_key):
