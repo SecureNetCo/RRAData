@@ -19,8 +19,6 @@ class DynamicSearchEngine {
         this.lastSearchKeyword = '';
         this.lastSearchField = 'product_name';
 
-        // 다운로드 제어용 AbortController
-        this.downloadAbortController = null;
         this.prefetchHandlersBound = false;
         this.prefetchHandlers = null;
 
@@ -351,10 +349,6 @@ class DynamicSearchEngine {
             }
         });
         
-        // 전체 다운로드 버튼
-        document.getElementById('download-all-btn').addEventListener('click', () => {
-            this.showDownloadModal();
-        });
     }
     
     async performSearch(keywordParam = null, searchFieldParam = null) {
@@ -810,128 +804,6 @@ class DynamicSearchEngine {
         }
     }
     
-    showDownloadModal() {
-        if (!this.lastSearchKeyword) {
-            this.showMessage('검색을 먼저 실행해주세요.', 'warning');
-            return;
-        }
-        
-        // 다운로드 모달 표시 (전체 건수 표시는 검색 후 업데이트)
-        document.getElementById('download-modal').style.display = 'flex';
-        document.getElementById('download-count').textContent = '전체 검색 결과';
-
-        const progressDiv = document.getElementById('download-progress');
-        if (progressDiv) {
-            progressDiv.style.display = 'none';
-        }
-    }
-    
-    async startDownload() {
-        const modal = document.getElementById('download-modal');
-        const progressDiv = document.getElementById('download-progress');
-        const progressMessage = document.getElementById('progress-message');
-        const progressFill = document.getElementById('progress-fill');
-        const progressPercentage = document.getElementById('progress-percentage');
-
-        if (progressDiv) {
-            progressDiv.style.display = 'block';
-        }
-        if (progressMessage) {
-            progressMessage.innerHTML = '<span class="download-spinner"></span><span class="loading-dots">Excel 파일 생성 중</span>';
-        }
-        if (progressFill) {
-            progressFill.style.width = '100%';
-            progressFill.style.animation = 'progress-slide 1s linear infinite';
-        }
-        if (progressPercentage) {
-            progressPercentage.style.display = 'none';
-        }
-
-        if (this.downloadAbortController) {
-            this.downloadAbortController.abort();
-        }
-
-        this.downloadAbortController = new AbortController();
-        const { signal } = this.downloadAbortController;
-
-        try {
-            let downloadUrl;
-            if (this.currentCategory === 'dataC' && this.currentResultType) {
-                downloadUrl = `/api/download-search/${this.currentCategory}/${this.currentResultType}/${this.currentSubcategory}`;
-            } else {
-                downloadUrl = `/api/download-search/${this.currentCategory}/${this.currentSubcategory}`;
-            }
-
-            const response = await fetch(downloadUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    keyword: this.lastSearchKeyword,
-                    search_field: this.lastSearchField,
-                    file_format: 'xlsx'
-                }),
-                signal
-            });
-
-            if (!response.ok) {
-                let errorDetail = '다운로드 요청이 실패했습니다.';
-                try {
-                    const errorBody = await response.json();
-                    if (errorBody?.detail) {
-                        errorDetail = errorBody.detail;
-                    }
-                } catch (jsonError) {
-                    console.warn('다운로드 실패 응답 파싱 오류:', jsonError);
-                }
-                throw new Error(errorDetail);
-            }
-
-            const blob = await response.blob();
-            const contentDisposition = response.headers.get('Content-Disposition');
-            let filename = `datapage_export_${new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)}.xlsx`;
-
-            if (contentDisposition) {
-                const match = contentDisposition.match(/filename\*=UTF-8''(.+)$|filename="?([^";]+)"?/i);
-                if (match) {
-                    const encoded = match[1] || match[2];
-                    if (encoded) {
-                        try {
-                            filename = decodeURIComponent(encoded);
-                        } catch (decodeError) {
-                            console.warn('파일명 디코딩 실패:', decodeError);
-                            filename = encoded;
-                        }
-                    }
-                }
-            }
-
-            const blobUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
-
-            this.showMessage('다운로드가 시작되었습니다.', 'info');
-            modal.style.display = 'none';
-        } catch (error) {
-            if (error.name === 'AbortError') {
-                this.showMessage('다운로드가 취소되었습니다.', 'warning');
-            } else {
-                console.error('다운로드 오류:', error);
-                this.showMessage(`다운로드 중 오류가 발생했습니다. (${error.message || error})`, 'error');
-            }
-        } finally {
-            if (progressDiv) {
-                progressDiv.style.display = 'none';
-            }
-            this.downloadAbortController = null;
-        }
-    }
     getUserSession() {
         // 세션 스토리지에서 사용자 세션 ID 가져오기 또는 생성
         let sessionId = sessionStorage.getItem('datapage_session');
@@ -1009,37 +881,4 @@ let searchEngine;
 document.addEventListener('DOMContentLoaded', function() {
     searchEngine = new DynamicSearchEngine();
     
-    // 모달 닫기 이벤트
-    document.getElementById('modal-close').addEventListener('click', () => {
-        if (searchEngine.downloadAbortController) {
-            searchEngine.downloadAbortController.abort();
-            searchEngine.downloadAbortController = null;
-        }
-        document.getElementById('download-modal').style.display = 'none';
-    });
-    
-    // 취소 버튼 이벤트
-    document.getElementById('cancel-download').addEventListener('click', () => {
-        if (searchEngine.downloadAbortController) {
-            searchEngine.downloadAbortController.abort();
-            searchEngine.downloadAbortController = null;
-        }
-        document.getElementById('download-modal').style.display = 'none';
-    });
-    
-    // 다운로드 시작 버튼 이벤트
-    document.getElementById('start-download').addEventListener('click', () => {
-        searchEngine.startDownload();
-    });
-    
-    // 모달 외부 클릭시 닫기
-    document.getElementById('download-modal').addEventListener('click', (e) => {
-        if (e.target.id === 'download-modal') {
-            if (searchEngine.downloadAbortController) {
-                searchEngine.downloadAbortController.abort();
-                searchEngine.downloadAbortController = null;
-            }
-            document.getElementById('download-modal').style.display = 'none';
-        }
-    });
 });
