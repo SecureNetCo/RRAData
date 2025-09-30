@@ -378,6 +378,13 @@ class DynamicSearchEngine {
             return;
         }
 
+        // 인증번호 필드 별도 검증 (나중에 활성화 가능)
+        const certNoValidation = this.validateCertNoSearch(keyword, searchField);
+        if (!certNoValidation.isValid) {
+            this.showMessage(certNoValidation.message, 'warning');
+            return;
+        }
+
         // 새로운 검색인 경우 페이지를 1로 초기화
         if (!keywordParam) {
             this.currentPage = 1;

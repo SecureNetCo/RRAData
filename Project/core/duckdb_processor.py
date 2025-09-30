@@ -45,6 +45,37 @@ DUCKDB_CACHE_ROOT = Path("/tmp/datapage_duckdb_cache")
 DUCKDB_CACHE_ROOT.mkdir(parents=True, exist_ok=True)
 
 
+def _get_search_pattern_and_operator(keyword: str, field: str) -> tuple[str, str]:
+    """
+    필드별 검색 패턴과 연산자 생성 함수
+    나중에 인증번호(cert_no) 필드에 대해 정확 매칭을 활성화할 수 있음
+
+    Returns:
+        tuple: (search_pattern, operator)
+        - operator: 'LIKE' 또는 '='
+        - search_pattern: 검색 패턴 (LIKE용 '%keyword%' 또는 정확매칭용 'keyword')
+    """
+    # 현재는 모든 필드에 기본 LIKE 검색 적용
+    # 나중에 다음과 같이 활성화 가능:
+
+    # 옵션 1: 인증번호 필드는 정확 매칭
+    # if field == 'cert_no':
+    #     return keyword, '='  # 정확 매칭
+
+    # 옵션 2: 인증번호 필드는 앞부분 매칭
+    # if field == 'cert_no':
+    #     return f"{keyword}%", 'LIKE'  # 앞부분만 매칭
+
+    # 기본: 부분 매칭 (LIKE '%keyword%')
+    return f"%{keyword}%", 'LIKE'
+
+
+def _get_search_pattern(keyword: str, field: str) -> str:
+    """하위 호환성을 위한 래퍼 함수"""
+    pattern, _ = _get_search_pattern_and_operator(keyword, field)
+    return pattern
+
+
 def _extract_file_name(path_like: Any) -> Optional[str]:
     """URL/경로 문자열에서 파일명만 안전하게 추출"""
     if not path_like:
@@ -1048,7 +1079,9 @@ class DuckDBProcessor:
             if is_case_insensitive:
                 search_pattern = f"%{keyword.lower()}%"
             else:
-                search_pattern = f"%{keyword}%"
+                # 인증번호 필드 별도 검색 로직 (나중에 활성화 가능)
+                search_pattern = _get_search_pattern(keyword, field)
+                # search_pattern = f"%{keyword}%"  # 기본 LIKE 검색
 
             if using_parquet:
                 # Parquet: 안전한 CAST 적용
