@@ -1792,12 +1792,6 @@ async def get_secure_file_url(
             detail=f"Signed URL 생성 중 오류가 발생했습니다: {str(e)}"
         )
 
-# 애플리케이션 시작시 초기화
-initialize_field_settings()
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
 # 프리페치 구성을 조회하는 헬퍼 (확장 가능)
 def get_prefetch_config() -> Dict[str, Any]:
     data_mode = os.getenv("DATA_MODE", "full").lower()
@@ -1807,3 +1801,10 @@ def get_prefetch_config() -> Dict[str, Any]:
         "data_mode": data_mode,
         "supported_keys": list(BLOB_ENV_PREFETCH_MAPPING.keys())
     }
+
+# 애플리케이션 시작시 초기화
+initialize_field_settings()
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
