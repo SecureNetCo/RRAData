@@ -2,10 +2,21 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>모두의 인증</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta
+      name="keywords" content="모두의 인증, 인증번호검색, KC인증, 어린이제품 KC인증, 더마테스트, 제품인증, 품질표시, 안전확인대상 생활화학제품, 임상시험"
+    />
+    <meta name="description" content="KC인증, 전자파 등 각종 인증번호 손쉽게 검색하세요." />
+    <meta name="author" content="주식회사 시큐어넷" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="모두의 인증번호검색" />
+    <meta property="og:description" content="KC인증, 전자파 등 각종 인증번호 손쉽게 검색하세요." />
+    <meta property="og:url" content="https://moducerti.com" />
+    <meta property="og:image" content="https://moducerti.com/og_image.png" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <title>모두의 인증번호검색</title>
     <!-- Cache bust: v1.1 -->
-    
+
     <!-- CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/static/css/style.css">
@@ -15,13 +26,13 @@
         <h1><a href="/" style="color: white; text-decoration: none;">모두의 인증</a></h1>
         <nav class="main-nav">
             <ul>
-                <li class="has-submenu">
-                    <a href="#">인증검색</a>
-                    <ul>
-                        <li><a href="/search/dataA/rra-certification">RRA 적합등록 인증</a></li>
-                        <li><a href="/search/dataA/rra-self-conformity">RRA 자기적합 인증</a></li>
-                    </ul>
-                </li>
+                <li><a href="/search/dataA/rra-certification">전자파 인증,등록</a></li>
+                <li><a href="/search/dataA/rra-self-conformity">전자파 자기적합확인</a></li>
+                <li><a href="/search/dataA/safetykoreachild">어린이 인증</a></li>
+                <li><a href="/search/dataA/safetykoreahome">전안법(생활)</a></li>
+                <li><a href="/search/dataA/safetykorea">전안법(전기)</a></li>
+                <li><a href="/search/dataA/declare">생활화학인증(신고)</a></li>
+                <li><a href="/search/dataA/approval">생활화학인증(승인)</a></li>
             </ul>
         </nav>
     </header>
@@ -51,9 +62,6 @@
             <div class="results-count">
                 <span id="total-count">0</span>건의 결과
             </div>
-            <!-- <button id="download-all-btn" class="download-btn">
-                <i class="fas fa-download"></i> 전체 다운로드
-            </button> -->
         </div>
 
         <!-- 검색 결과 -->
@@ -86,54 +94,6 @@
         <p>© 모두의 인증</p>
     </footer>
 
-    <!-- 다운로드 모달 -->
-    <div id="download-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-download"></i> 파일 다운로드</h3>
-                <button class="modal-close" id="modal-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="modal-body">
-                <div class="download-options">
-                    <h4>Excel 파일로 다운로드</h4>
-                    <div class="format-info">
-                        <div class="format-description">
-                            <i class="fas fa-file-excel" style="color: #27ae60; font-size: 2rem; margin-bottom: 10px;"></i>
-                            <p>검색된 결과를 Excel 파일(.xlsx)로 다운로드합니다.</p>
-                            <p>모든 필드가 포함되며, 필터링 및 정렬이 가능합니다.</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="download-info">
-                    <div class="info-item">
-                        <span class="info-label">데이터 건수:</span>
-                        <span id="download-count" class="info-value">0건</span>
-                    </div>
-                </div>
-                
-                <div class="download-progress" id="download-progress" style="display: none;">
-                    <div class="progress-info">
-                        <span id="progress-message">파일 생성 중...</span>
-                        <span id="progress-percentage">0%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div id="progress-fill" class="progress-fill"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button id="cancel-download" class="btn btn-secondary">취소</button>
-                <button id="start-download" class="btn btn-primary">
-                    <i class="fas fa-download"></i> 다운로드 시작
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- 로딩 오버레이 -->
     <div id="loading-overlay" class="loading-overlay" style="display: none;">

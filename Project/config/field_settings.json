@@ -2,8 +2,8 @@
   "dataA": {
     "rra-cert": {
       "category_info": {
-        "display_name": "RRA 인증정보",
-        "description": "RRA(방송통신기자재 적합성평가) 인증 제품 정보",
+        "display_name": "전자파 인증, 등록",
+        "description": "방송통신 기자재 적합성평가 인증 제품 정보",
         "icon": "radio",
         "data_file": "parquet/11_rra_cert_flattened.parquet",
         "is_large_file": true,
@@ -110,8 +110,8 @@
     },
     "rra-self-cert": {
       "category_info": {
-        "display_name": "RRA 자기적합성선언",
-        "description": "RRA 자기적합성선언 제품 정보",
+        "display_name": "전자파 자기적합확인",
+        "description": "방송통신 기자재 적합성평가 자기적합 확인 공개 제품 정보",
         "icon": "clipboard-check",
         "data_file": "parquet/12_rra_self_cert_flattened.parquet",
         "is_large_file": false,
@@ -218,10 +218,10 @@
     },
     "approval": {
       "category_info": {
-        "display_name": "전파인증정보",
-        "description": "방송통신기기 전파인증 정보",
+        "display_name": "생활화학인증(승인)",
+        "description": "안전확인대상 생활화학제품 승인 제품 정보",
         "icon": "signal",
-        "data_file": "parquet/approval_flattened.parquet",
+        "data_file": "parquet/6_approval_flattened.parquet",
         "is_large_file": true,
         "data_path": "root"
       },
@@ -326,10 +326,10 @@
     },
     "declare": {
       "category_info": {
-        "display_name": "적합성평가 신고정보",
-        "description": "방송통신기기 적합성평가 신고 정보",
+        "display_name": "생활화학인증(신고)",
+        "description": "안전확인대상 생활화학제품 신고 제품 정보",
         "icon": "file-text",
-        "data_file": "parquet/declare_flattened.parquet",
+        "data_file": "parquet/7_declare_flattened.parquet",
         "is_large_file": true,
         "data_path": "root"
       },
@@ -434,10 +434,10 @@
     },
     "safetykorea": {
       "category_info": {
-        "display_name": "안전인증정보",
-        "description": "제품안전기본법 안전인증 정보",
+        "display_name": "전안법(전기)",
+        "description": "전기용품 및 생활용품안전관리법 인증 제품 정보",
         "icon": "shield-check",
-        "data_file": "parquet/safetykorea_flattened.parquet",
+        "data_file": "parquet/1_safetykorea_flattened.parquet",
         "is_large_file": true,
         "data_path": "root"
       },
@@ -540,10 +540,10 @@
     },
     "safetykoreachild": {
       "category_info": {
-        "display_name": "어린이제품 안전인증",
-        "description": "어린이제품 안전특별법 안전인증 정보",
+        "display_name": "어린이 인증",
+        "description": "어린이제품 안전특별법 인증 제품 정보",
         "icon": "baby",
-        "data_file": "parquet/safetykoreachild_flattened.parquet",
+        "data_file": "parquet/10_safetykoreachild_flattened.parquet",
         "is_large_file": true,
         "data_path": "root"
       },
@@ -648,10 +648,10 @@
     },
     "safetykoreahome": {
       "category_info": {
-        "display_name": "생활용품 안전인증",
-        "description": "생활용품 안전관리법 안전인증 정보",
+        "display_name": "전안법(생활)",
+        "description": "전기용품 및 생활용품안전관리법 인증 제품 정보",
         "icon": "home",
-        "data_file": "parquet/safetykoreahome_flattened.parquet",
+        "data_file": "parquet/11_safetykoreahome_flattened.parquet",
         "is_large_file": true,
         "data_path": "root"
       },
