@@ -1275,7 +1275,7 @@ def get_data_file_path(category: str, subcategory: str, prefer_r2: bool = False)
     if r2_env_var:
         r2_url = os.getenv(r2_env_var)
         if r2_url:
-            logger.info(f"R2 URL: {category}/{subcategory} → {r2_url}")
+            logger.info(f"R2 URL found for: {category}/{subcategory}")
             return r2_url
         else:
             logger.warning(f"R2 환경변수 없음: {r2_env_var}")

@@ -227,94 +227,84 @@
       },
       "display_fields": [
         {
-          "field": "cert_no",
-          "name": "인증번호",
-          "width": "15%",
+          "field": "업체명",
+          "name": "업체명",
+          "width": "25%",
+          "type": "text",
+          "align": "left",
+          "sortable": true,
+          "searchable": true
+        },
+        {
+          "field": "품목",
+          "name": "품목",
+          "width": "25%",
+          "type": "text",
+          "align": "left",
+          "sortable": true,
+          "searchable": true
+        },
+        {
+          "field": "승인번호",
+          "name": "승인번호",
+          "width": "20%",
           "type": "text",
           "align": "center",
           "sortable": true,
           "searchable": true
         },
         {
-          "field": "product_name",
-          "name": "제품명",
-          "width": "20%",
-          "type": "text",
-          "align": "left",
-          "sortable": true,
-          "searchable": true
-        },
-        {
-          "field": "model_name",
-          "name": "모델명",
+          "field": "승인일자",
+          "name": "승인일자",
           "width": "15%",
-          "type": "text",
-          "align": "left",
-          "sortable": true,
-          "searchable": true
-        },
-        {
-          "field": "company_name",
-          "name": "업체명",
-          "width": "15%",
-          "type": "text",
-          "align": "left",
-          "sortable": true,
-          "searchable": true
-        },
-        {
-          "field": "country",
-          "name": "제조국가",
-          "width": "8%",
-          "type": "text",
+          "type": "date",
+          "format": "YYYYMMDD",
           "align": "center",
           "sortable": true,
           "searchable": false
         },
         {
-          "field": "cert_date",
-          "name": "인증일자",
-          "width": "10%",
-          "type": "date",
-          "format": "YYYY-MM-DD",
+          "field": "구분(제조/수입)",
+          "name": "구분",
+          "width": "15%",
+          "type": "text",
           "align": "center",
           "sortable": true,
           "searchable": false
         }
       ],
       "download_fields": [
-        "cert_no",
-        "product_name",
-        "model_name",
-        "company_name",
-        "manufacturer",
-        "country",
-        "cert_date",
-        "frequency",
-        "power"
+        "product_id",
+        "승인번호",
+        "승인일자",
+        "구분(제조/수입)",
+        "업체명",
+        "품목",
+        "제품제형",
+        "저장방법 및 유통기한",
+        "중량·용량·매수"
       ],
       "search_fields": [
         {
-          "field": "cert_no",
-          "name": "인증번호",
-          "placeholder": "인증번호로 검색"
+          "field": "승인번호",
+          "name": "승인번호",
+          "placeholder": "승인번호로 검색"
         }
       ],
       "field_types": {
-        "cert_no": "text",
-        "product_name": "text",
-        "model_name": "text",
-        "company_name": "text",
-        "manufacturer": "text",
-        "country": "text",
-        "cert_date": "date",
-        "frequency": "text",
-        "power": "text",
-        "crawled_at": "datetime"
+        "product_id": "text",
+        "승인번호": "text",
+        "승인일자": "text",
+        "구분(제조/수입)": "text",
+        "업체명": "text",
+        "품목": "text",
+        "제품제형": "text",
+        "저장방법 및 유통기한": "text",
+        "중량·용량·매수": "text"
       },
       "ui_settings": {
         "default_sort": {
-          "field": "cert_date",
+          "field": "승인일자",
           "direction": "desc"
         },
         "items_per_page": 20,
@@ -335,16 +325,7 @@
       },
       "display_fields": [
         {
-          "field": "declare_no",
-          "name": "신고번호",
-          "width": "15%",
-          "type": "text",
-          "align": "center",
-          "sortable": true,
-          "searchable": true
-        },
-        {
-          "field": "product_name",
+          "field": "제품명",
           "name": "제품명",
           "width": "20%",
           "type": "text",
@@ -353,8 +334,8 @@
           "searchable": true
         },
         {
-          "field": "model_name",
-          "name": "모델명",
+          "field": "업체",
+          "name": "업체",
           "width": "15%",
           "type": "text",
           "align": "left",
@@ -362,67 +343,129 @@
           "searchable": true
         },
         {
-          "field": "company_name",
-          "name": "업체명",
+          "field": "신고번호",
+          "name": "신고번호",
           "width": "15%",
           "type": "text",
-          "align": "left",
+          "align": "center",
           "sortable": true,
           "searchable": true
         },
         {
-          "field": "country",
-          "name": "제조국가",
-          "width": "8%",
+          "field": "신고증명서 발급일",
+          "name": "발급일",
+          "width": "10%",
           "type": "text",
           "align": "center",
           "sortable": true,
           "searchable": false
         },
         {
-          "field": "declare_date",
-          "name": "신고일자",
+          "field": "시험성적서 만료일",
+          "name": "만료일",
           "width": "10%",
-          "type": "date",
-          "format": "YYYY-MM-DD",
+          "type": "text",
           "align": "center",
           "sortable": true,
+          "searchable": false
+        },
+        {
+          "field": "분류",
+          "name": "분류",
+          "width": "10%",
+          "type": "text",
+          "align": "center",
+          "sortable": true,
+          "searchable": false
+        },
+        {
+          "field": "구분(제조/수입)",
+          "name": "구분(제조/수입)",
+          "width": "10%",
+          "type": "text",
+          "align": "center",
+          "sortable": true,
+          "searchable": false
+        },
+        {
+          "field": "제조국명, 제조회사",
+          "name": "제조국/회사",
+          "width": "10%",
+          "type": "text",
+          "align": "left",
+          "sortable": false,
           "searchable": false
         }
       ],
       "download_fields": [
-        "declare_no",
-        "product_name",
-        "model_name",
-        "company_name",
-        "manufacturer",
-        "country",
-        "declare_date",
-        "frequency",
-        "power"
+        "신고번호",
+        "제품명",
+        "업체",
+        "분류",
+        "품목.용도",
+        "시험검사기관",
+        "구분(제조/수입)",
+        "신고증명서 발급일",
+        "시험성적서 만료일",
+        "제품제형",
+        "제품구분(대표/파생)",
+        "성적발급구분",
+        "검사기준",
+        "어린이보호포장 대상",
+        "유통기한",
+        "중량·용량·매수·크기",
+        "어는점",
+        "액성",
+        "표준사용량",
+        "제조자,  주소, 연락처",
+        "사용방법",
+        "사용상 주의사항",
+        "응급처치",
+        "표시도안",
+        "수입자,  주소, 연락처",
+        "제조국명, 제조회사",
+        "판매자, 주소, 연락처"
       ],
       "search_fields": [
         {
-          "field": "declare_no",
+          "field": "신고번호",
           "name": "신고번호",
           "placeholder": "신고번호로 검색"
         }
       ],
       "field_types": {
-        "declare_no": "text",
-        "product_name": "text",
-        "model_name": "text",
-        "company_name": "text",
-        "manufacturer": "text",
-        "country": "text",
-        "declare_date": "date",
-        "frequency": "text",
-        "power": "text",
-        "crawled_at": "datetime"
+        "product_id": "text",
+        "신고번호": "text",
+        "시험검사기관": "text",
+        "제품구분(대표/파생)": "text",
+        "신고증명서 발급일": "date",
+        "성적발급구분": "text",
+        "검사기준": "text",
+        "시험성적서 만료일": "date",
+        "구분(제조/수입)": "text",
+        "업체": "text",
+        "제품명": "text",
+        "분류": "text",
+        "품목.용도": "text",
+        "어린이보호포장 대상": "text",
+        "제품제형": "text",
+        "유통기한": "text",
+        "중량·용량·매수·크기": "text",
+        "어는점": "text",
+        "액성": "text",
+        "표준사용량": "text",
+        "제조자,  주소, 연락처": "text",
+        "사용방법": "text",
+        "사용상 주의사항": "text",
+        "응급처치": "text",
+        "표시도안": "text",
+        "수입자,  주소, 연락처": "text",
+        "제조국명, 제조회사": "text",
+        "판매자, 주소, 연락처": "text"
       },
       "ui_settings": {
         "default_sort": {
-          "field": "declare_date",
+          "field": "신고증명서 발급일",
           "direction": "desc"
         },
         "items_per_page": 20,
@@ -443,18 +486,27 @@
       },
       "display_fields": [
         {
-          "field": "cert_no",
-          "name": "인증번호",
+          "field": "product_name",
+          "name": "제품명",
           "width": "15%",
           "type": "text",
-          "align": "center",
+          "align": "left",
           "sortable": true,
           "searchable": true
         },
         {
-          "field": "product_name",
-          "name": "제품명",
-          "width": "20%",
+          "field": "importer_name",
+          "name": "수입업체",
+          "width": "8%",
+          "type": "text",
+          "align": "left",
+          "sortable": true,
+          "searchable": true
+        },
+        {
+          "field": "maker_name",
+          "name": "제조업체",
+          "width": "12%",
           "type": "text",
           "align": "left",
           "sortable": true,
@@ -463,68 +515,93 @@
         {
           "field": "model_name",
           "name": "모델명",
-          "width": "15%",
-          "type": "text",
-          "align": "left",
-          "sortable": true,
-          "searchable": true
-        },
-        {
-          "field": "company_name",
-          "name": "업체명",
-          "width": "15%",
-          "type": "text",
-          "align": "left",
-          "sortable": true,
-          "searchable": true
-        },
-        {
-          "field": "manufacturer",
-          "name": "제조업체",
           "width": "10%",
           "type": "text",
           "align": "left",
+          "sortable": true,
+          "searchable": true
+        },
+        {
+          "field": "cert_num",
+          "name": "인증번호",
+          "width": "10%",
+          "type": "text",
+          "align": "center",
           "sortable": true,
           "searchable": true
         },
         {
           "field": "cert_date",
           "name": "인증일자",
-          "width": "10%",
+          "width": "7%",
           "type": "date",
           "format": "YYYY-MM-DD",
           "align": "center",
           "sortable": true,
           "searchable": false
+        },
+        {
+          "field": "certification_image_urls",
+          "name": "인증이미지",
+          "width": "8%",
+          "type": "text",
+          "align": "left",
+          "sortable": false,
+          "searchable": false
         }
       ],
       "download_fields": [
-        "cert_no",
         "product_name",
+        "maker_name",
         "model_name",
-        "company_name",
-        "manufacturer",
+        "brand_name",
+        "cert_num",
+        "cert_div",
         "cert_date",
-        "expire_date",
-        "safety_standard"
+        "cert_state",
+        "cert_organ_name",
+        "category_name",
+        "import_div",
+        "maker_country_name",
+        "importer_name",
+        "first_cert_num",
+        "cert_chg_date",
+        "cert_chg_reason",
+        "sign_date",
+        "remark",
+        "cert_uid",
+        "factories",
+        "derivation_models",
+        "similar_certifications",
+        "certification_image_urls"
       ],
       "search_fields": [
         {
-          "field": "cert_no",
+          "field": "cert_num",
           "name": "인증번호",
           "placeholder": "인증번호로 검색"
         }
       ],
       "field_types": {
-        "cert_no": "text",
-        "product_name": "text",
-        "model_name": "text",
-        "company_name": "text",
-        "manufacturer": "text",
+        "cert_uid": "number",
+        "cert_organ_name": "text",
+        "cert_num": "text",
+        "cert_state": "text",
+        "cert_div": "text",
         "cert_date": "date",
-        "expire_date": "date",
-        "safety_standard": "text",
-        "crawled_at": "datetime"
+        "cert_chg_date": "date",
+        "cert_chg_reason": "text",
+        "first_cert_num": "text",
+        "product_name": "text",
+        "brand_name": "text",
+        "model_name": "text",
+        "category_name": "text",
+        "import_div": "text",
+        "maker_name": "text",
+        "maker_country_name": "text",
+        "importer_name": "text",
+        "remark": "text",
+        "sign_date": "date"
       },
       "ui_settings": {
         "default_sort": {
@@ -549,18 +626,27 @@
       },
       "display_fields": [
         {
-          "field": "cert_no",
-          "name": "인증번호",
+          "field": "product_name",
+          "name": "제품명",
           "width": "15%",
           "type": "text",
-          "align": "center",
+          "align": "left",
           "sortable": true,
           "searchable": true
         },
         {
-          "field": "product_name",
-          "name": "제품명",
-          "width": "20%",
+          "field": "importer_name",
+          "name": "수입업체",
+          "width": "8%",
+          "type": "text",
+          "align": "left",
+          "sortable": true,
+          "searchable": true
+        },
+        {
+          "field": "maker_name",
+          "name": "제조업체",
+          "width": "12%",
           "type": "text",
           "align": "left",
           "sortable": true,
@@ -569,70 +655,93 @@
         {
           "field": "model_name",
           "name": "모델명",
-          "width": "15%",
-          "type": "text",
-          "align": "left",
-          "sortable": true,
-          "searchable": true
-        },
-        {
-          "field": "company_name",
-          "name": "업체명",
-          "width": "15%",
-          "type": "text",
-          "align": "left",
-          "sortable": true,
-          "searchable": true
-        },
-        {
-          "field": "manufacturer",
-          "name": "제조업체",
           "width": "10%",
           "type": "text",
           "align": "left",
+          "sortable": true,
+          "searchable": true
+        },
+        {
+          "field": "cert_num",
+          "name": "인증번호",
+          "width": "10%",
+          "type": "text",
+          "align": "center",
           "sortable": true,
           "searchable": true
         },
         {
           "field": "cert_date",
           "name": "인증일자",
-          "width": "10%",
+          "width": "7%",
           "type": "date",
           "format": "YYYY-MM-DD",
           "align": "center",
           "sortable": true,
           "searchable": false
+        },
+        {
+          "field": "certification_image_urls",
+          "name": "인증이미지",
+          "width": "8%",
+          "type": "text",
+          "align": "left",
+          "sortable": false,
+          "searchable": false
         }
       ],
       "download_fields": [
-        "cert_no",
         "product_name",
+        "maker_name",
         "model_name",
-        "company_name",
-        "manufacturer",
+        "brand_name",
+        "cert_num",
+        "cert_div",
         "cert_date",
-        "expire_date",
-        "safety_standard",
-        "age_range"
+        "cert_state",
+        "cert_organ_name",
+        "category_name",
+        "import_div",
+        "maker_country_name",
+        "importer_name",
+        "first_cert_num",
+        "cert_chg_date",
+        "cert_chg_reason",
+        "sign_date",
+        "remark",
+        "cert_uid",
+        "factories",
+        "derivation_models",
+        "similar_certifications",
+        "certification_image_urls"
       ],
       "search_fields": [
         {
-          "field": "cert_no",
+          "field": "cert_num",
           "name": "인증번호",
           "placeholder": "인증번호로 검색"
         }
       ],
       "field_types": {
-        "cert_no": "text",
-        "product_name": "text",
-        "model_name": "text",
-        "company_name": "text",
-        "manufacturer": "text",
+        "cert_uid": "number",
+        "cert_organ_name": "text",
+        "cert_num": "text",
+        "cert_state": "text",
+        "cert_div": "text",
         "cert_date": "date",
-        "expire_date": "date",
-        "safety_standard": "text",
-        "age_range": "text",
-        "crawled_at": "datetime"
+        "cert_chg_date": "date",
+        "cert_chg_reason": "text",
+        "first_cert_num": "text",
+        "product_name": "text",
+        "brand_name": "text",
+        "model_name": "text",
+        "category_name": "text",
+        "import_div": "text",
+        "maker_name": "text",
+        "maker_country_name": "text",
+        "importer_name": "text",
+        "remark": "text",
+        "sign_date": "date"
       },
       "ui_settings": {
         "default_sort": {
@@ -657,18 +766,27 @@
       },
       "display_fields": [
         {
-          "field": "cert_no",
-          "name": "인증번호",
+          "field": "product_name",
+          "name": "제품명",
           "width": "15%",
           "type": "text",
-          "align": "center",
+          "align": "left",
           "sortable": true,
           "searchable": true
         },
         {
-          "field": "product_name",
-          "name": "제품명",
-          "width": "20%",
+          "field": "importer_name",
+          "name": "수입업체",
+          "width": "8%",
+          "type": "text",
+          "align": "left",
+          "sortable": true,
+          "searchable": true
+        },
+        {
+          "field": "maker_name",
+          "name": "제조업체",
+          "width": "12%",
           "type": "text",
           "align": "left",
           "sortable": true,
@@ -677,70 +795,93 @@
         {
           "field": "model_name",
           "name": "모델명",
-          "width": "15%",
-          "type": "text",
-          "align": "left",
-          "sortable": true,
-          "searchable": true
-        },
-        {
-          "field": "company_name",
-          "name": "업체명",
-          "width": "15%",
-          "type": "text",
-          "align": "left",
-          "sortable": true,
-          "searchable": true
-        },
-        {
-          "field": "manufacturer",
-          "name": "제조업체",
           "width": "10%",
           "type": "text",
           "align": "left",
+          "sortable": true,
+          "searchable": true
+        },
+        {
+          "field": "cert_num",
+          "name": "인증번호",
+          "width": "10%",
+          "type": "text",
+          "align": "center",
           "sortable": true,
           "searchable": true
         },
         {
           "field": "cert_date",
           "name": "인증일자",
-          "width": "10%",
+          "width": "7%",
           "type": "date",
           "format": "YYYY-MM-DD",
           "align": "center",
           "sortable": true,
           "searchable": false
+        },
+        {
+          "field": "certification_image_urls",
+          "name": "인증이미지",
+          "width": "8%",
+          "type": "text",
+          "align": "left",
+          "sortable": false,
+          "searchable": false
         }
       ],
       "download_fields": [
-        "cert_no",
         "product_name",
+        "maker_name",
         "model_name",
-        "company_name",
-        "manufacturer",
+        "brand_name",
+        "cert_num",
+        "cert_div",
         "cert_date",
-        "expire_date",
-        "safety_standard",
-        "category"
+        "cert_state",
+        "cert_organ_name",
+        "category_name",
+        "import_div",
+        "maker_country_name",
+        "importer_name",
+        "first_cert_num",
+        "cert_chg_date",
+        "cert_chg_reason",
+        "sign_date",
+        "remark",
+        "cert_uid",
+        "factories",
+        "derivation_models",
+        "similar_certifications",
+        "certification_image_urls"
       ],
       "search_fields": [
         {
-          "field": "cert_no",
+          "field": "cert_num",
           "name": "인증번호",
           "placeholder": "인증번호로 검색"
         }
       ],
       "field_types": {
-        "cert_no": "text",
-        "product_name": "text",
-        "model_name": "text",
-        "company_name": "text",
-        "manufacturer": "text",
+        "cert_uid": "number",
+        "cert_organ_name": "text",
+        "cert_num": "text",
+        "cert_state": "text",
+        "cert_div": "text",
         "cert_date": "date",
-        "expire_date": "date",
-        "safety_standard": "text",
-        "category": "text",
-        "crawled_at": "datetime"
+        "cert_chg_date": "date",
+        "cert_chg_reason": "text",
+        "first_cert_num": "text",
+        "product_name": "text",
+        "brand_name": "text",
+        "model_name": "text",
+        "category_name": "text",
+        "import_div": "text",
+        "maker_name": "text",
+        "maker_country_name": "text",
+        "importer_name": "text",
+        "remark": "text",
+        "sign_date": "date"
       },
       "ui_settings": {
         "default_sort": {
@@ -752,6 +893,7 @@
         "enable_download": true,
         "enable_pagination": true,
         "show_total_count": true
+      
       }
     }
   }
