@@ -247,6 +247,15 @@
         {
           "field": "업체명",
           "name": "업체명",
+          "width": "20%",
+          "type": "text",
+          "align": "left",
+          "sortable": true,
+          "searchable": true
+        },
+        {
+          "field": "제품명",
+          "name": "제품명",
           "width": "25%",
           "type": "text",
           "align": "left",
@@ -256,7 +265,7 @@
         {
           "field": "품목",
           "name": "품목",
-          "width": "25%",
+          "width": "15%",
           "type": "text",
           "align": "left",
           "sortable": true,
@@ -265,7 +274,7 @@
         {
           "field": "승인번호",
           "name": "승인번호",
-          "width": "20%",
+          "width": "10%",
           "type": "text",
           "align": "center",
           "sortable": true,
@@ -274,7 +283,7 @@
         {
           "field": "승인일자",
           "name": "승인일자",
-          "width": "15%",
+          "width": "10%",
           "type": "date",
           "format": "YYYYMMDD",
           "align": "center",
@@ -284,7 +293,7 @@
         {
           "field": "구분(제조/수입)",
           "name": "구분",
-          "width": "15%",
+          "width": "10%",
           "type": "text",
           "align": "center",
           "sortable": true,
@@ -297,6 +306,7 @@
         "승인일자",
         "구분(제조/수입)",
         "업체명",
+        "제품명",
         "품목",
         "제품제형",
         "저장방법 및 유통기한",
@@ -315,6 +325,7 @@
         "승인일자": "text",
         "구분(제조/수입)": "text",
         "업체명": "text",
+        "제품명": "text",
         "품목": "text",
         "제품제형": "text",
         "저장방법 및 유통기한": "text",
