@@ -1022,14 +1022,14 @@ class DuckDBProcessor:
                 search_pattern = f"%{keyword.lower()}%"
 
             if using_parquet:
-                # Parquet: 안전한 CAST 적용
+                # Parquet: VARCHAR 필드는 CAST 불필요 (성능 최적화)
                 if is_case_insensitive and operator == 'LIKE':
                     # **성능 최적화: 컬럼만 LOWER, 검색어는 이미 Python에서 변환됨**
-                    conditions.append(f"LOWER(CAST({table_alias}\"{field}\" AS VARCHAR)) {operator} ?")
+                    conditions.append(f"LOWER({table_alias}\"{field}\") {operator} ?")
                     logger.info(f"필드 '{field}': 대소문자 구분 안함 (컬럼만 LOWER 적용), 연산자: {operator}")
                 else:
-                    # 대소문자 구분함 또는 정확 매칭: LOWER 함수 사용 안함
-                    conditions.append(f"CAST({table_alias}\"{field}\" AS VARCHAR) {operator} ?")
+                    # 대소문자 구분함 또는 정확 매칭: CAST, LOWER 함수 모두 사용 안함
+                    conditions.append(f"{table_alias}\"{field}\" {operator} ?")
                     logger.info(f"필드 '{field}': 대소문자 구분함 또는 정확매칭, 연산자: {operator}")
             else:
                 # JSON: 복합 타입은 문자열로 변환하여 검색
